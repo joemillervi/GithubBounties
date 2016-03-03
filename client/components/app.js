@@ -34,15 +34,32 @@ const App = class App extends React.Component {
       route: '/',
       currentUser: {
         loggedIn: false,
-        userName: ''
+        name: '',
+        login: ''
       }
     };
   }
-
+  fetchUserInfo() {
+    $.get( "fetchUserInfo", ( data ) => {
+      console.log(data);
+      if (data) {
+        this.setState({currentUser: {
+          loggedIn: true,
+          name: data.displayName,
+          login: data.username
+        }})
+      }
+    });
+  }
   render () {
     return (
     <div className='app-shell grey lighten-2'>
-      <NavBar loggedIn={this.state.currentUser.loggedIn} linksRight={linksRight} linksLeft={linksLeft}/>
+      <NavBar
+      fetchUserInfo={this.fetchUserInfo.bind(this)}
+      loggedIn={this.state.currentUser.loggedIn}
+      login={this.state.currentUser.login} l
+      linksRight={linksRight}
+      linksLeft={linksLeft}/>
       <div className="row">
         <div className="main col s12 container">
           {this.props.children}
