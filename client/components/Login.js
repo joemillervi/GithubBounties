@@ -23,7 +23,6 @@ class Login extends React.Component {
   }
 
   render() {
-    var CLIENT_ID = "88a89b8259ca587fe9f3";
     return (
       <div className="loginDiv">
         <h1>Login</h1>
