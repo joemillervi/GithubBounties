@@ -30,12 +30,15 @@ class BountyForm extends React.Component {
       var token = response.id;
       //send the token to the server so we can use it to make a customer object and store in our database
       $.ajax({
-        url: 'http://127.0.0.1:3000/stripe',
+        url: 'http://127.0.0.1:3000/stripeCC',
         dataType: 'json',
         type: 'POST',
-        data: {stripeToken: token},
+        data: {
+          stripeToken: token,
+          githubId: 1 //TODO: pass down from app state as props
+        },
         success: function(data) {
-          console.log(data);
+          console.log('data..............', data);
         },
         error: function(xhr, status, err) {
           console.error('/stripe', status, err.toString());

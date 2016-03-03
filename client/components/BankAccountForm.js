@@ -6,6 +6,7 @@ class BankAccountForm extends React.Component {
     super(props);
 
     this.state = {
+      email: '',
       bankAccount: {
         country: '',
         currency: '',
@@ -23,15 +24,22 @@ class BankAccountForm extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
+    var state = this.state;
+    console.log(state);
     Stripe.bankAccount.createToken(this.state.bankAccount, function (status, response) {
       console.log( status, response );
-      var token = response.id;
       //send the token to the server so we can attach it to a customer object and store in our database
       $.ajax({
-        url: 'http://127.0.0.1:3000/stripeBankAccount',
+        url: 'http://127.0.0.1:3000/stripeB',
         dataType: 'json',
         type: 'POST',
-        data: {stripeToken: token},
+        data: {
+          name: state.bankAccount.name,
+          type: state.bankAccount.account_holder_type,
+          bank_account: response.id,
+          email: state.email,
+          githubId: 1 //TODO: pass down from app state as props
+        },
         success: function(data) {
           console.log(data);
         },
@@ -47,7 +55,10 @@ class BankAccountForm extends React.Component {
     let bankAccount = this.state.bankAccount;
     bankAccount[e.target.name] = e.target.value;
     this.setState(bankAccount);
-    console.log(this.state);
+  }
+
+  handleEmailChange(e) {
+    this.setState({email: e.target.value});
   }
 
   render() {
@@ -56,6 +67,8 @@ class BankAccountForm extends React.Component {
         <p>Github Bounties will never store your bank account information. </p>
         
         <form onSubmit={ this.handleSubmit.bind(this) } className="col s12" >
+
+
           <div className="row">
             <div className="input-field col s6">
               <span>Name</span>
@@ -86,6 +99,13 @@ class BankAccountForm extends React.Component {
             <div className="input-field col s6">
               <span>Country</span>
               <input maxLength="2" placeholder="US" id="country" name="country" required onChange={this.handleBankAccountChange.bind(this)} />
+            </div>
+          </div>
+
+          <div className="row">
+            <div className="input-field col s12">
+              <span>Email</span>
+              <input id="email" name="email" placeholder="johndoe@gmail.com" required onChange={this.handleEmailChange.bind(this)} />
             </div>
           </div>
 
