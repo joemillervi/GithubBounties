@@ -11,12 +11,7 @@ var partials = require('express-partials');
 var db = require('./db/database');
 var config = require('./config')
 
-
-
-console.log('starting server ')
-
 var stripe = require("stripe")("sk_test_BQokikJOvBiI2HlWgH4olfQ2");
-var mysql = require('mysql');
 
 var Issues = require('./models/issues');
 Issues = new Issues();
@@ -28,7 +23,6 @@ var Users = require('./models/users');
 Users = new Users();
 
 // configure express
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static(__dirname + '/../client'));
@@ -42,7 +36,7 @@ app.use(function(req, res, next) {
 var port = process.env.PORT || 3000;
 
 app.route('/api')
-  .get(function(req, res){
+  .get(function(req, res) {
     res.send('Hello World');
   });
 
@@ -57,8 +51,19 @@ app.route('/api/issues')
     });
   });
 
+app.route('/api/bounties')
+  .get(function(req, res) {
+    Issues.getBounties()
+    .then((results) => res.send(results))
+    .catch((err) => {
+      console.log(err);
+      res.statusCode = 501;
+      res.send('Unknown Server Error');
+    });
+  });
+
 app.route('/api/repos')
-  .get(function(req, res){
+  .get(function(req, res) {
     Repos.getRepos()
     .then((results) => res.send(results))
     .catch(() => {
@@ -74,7 +79,6 @@ passport.serializeUser(function(user, done) {
 
 passport.deserializeUser(function(obj, done) {
   done(null, obj);
-});
 
 passport.use(new GitHubStrategy({
     clientID: config.GITHUB_CLIENT,
@@ -149,9 +153,12 @@ app.get('/fetchUserInfo', function(req, res) {
   console.log('on cookie: ', req.session)
   res.json(req.session.passport.user)
 })
+// NOT SURE IF NEEDED
+//   serverResponse.end(JSON.stringify(token));
+// });
 
 app.route('/stripe')
-  .post(function(req, res){
+  .post(function(req, res) {
     var stripeToken = req.body.stripeToken;
     stripe.customers.create({
       source: stripeToken,
@@ -163,9 +170,9 @@ app.route('/stripe')
       .catch(() => {
         res.statusCode = 501;
         res.send('Unknown Server Error');
-      })
-    })
-  })
+      });
+    });
+  });
 
 console.log(`server running on port ${port} in ${process.env.NODE_ENV} mode`);
 // start listening to requests on port 3000
