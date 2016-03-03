@@ -22,8 +22,8 @@ const App = class App extends React.Component {
       route: '/',
       currentUser: {
         loggedIn: false,
-        name: '',
-        login: ''
+        displayName: '',
+        username: ''
       }
     };
   }
@@ -33,8 +33,8 @@ const App = class App extends React.Component {
       if (data) {
         this.setState({currentUser: {
           loggedIn: true,
-          name: data.displayName,
-          login: data.username
+          displayName: data.displayName,
+          username: data.username
         }})
       }
     });
