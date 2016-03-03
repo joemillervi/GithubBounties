@@ -17,26 +17,26 @@ class TicketList extends React.Component {
     this.getBounties = this.getBounties.bind(this);
   }
   
-  getIssues(searchTerm, language){
+  getIssues(searchTerm, language) {
     //Fetch issues;
     var self = this;
 
     Issues.getIssues(function(data) {
       self.setState({
         numberOfTickets: data.length,
-        ticketsToRender: data.slice(0,199)
+        ticketsToRender: data.slice(0, 199)
       });
     }, console.log, searchTerm, language);
   }
 
-  getBounties(searchTerm, language){
+  getBounties(searchTerm, language) {
     //Fetch issues;
     var self = this;
 
     Issues.getBounties(function(data) {
       self.setState({
         numberOfTickets: data.length,
-        ticketsToRender: data.slice(0,199)
+        ticketsToRender: data.slice(0, 199)
       });
     }, console.log, searchTerm, language);
   }
@@ -50,6 +50,7 @@ class TicketList extends React.Component {
   }
   render () {
     if (this.state.bounties) {
+      console.log('rendering this');
       return (
       <div>
         <TicketSearch searchHandler={this.getBounties} />
