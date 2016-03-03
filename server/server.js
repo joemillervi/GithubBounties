@@ -55,10 +55,11 @@ app.route('/api/repos')
   });
 
 app.get('/gitHubRedirect', function(req, res) {
-  res.redirect("https://github.com/login/oauth/authorize?scope=user:email&client_id=" + config.GITHUB_CLIENT);
+  res.redirect("https://github.com/login/oauth/authorize?scope=user:email&client_id=" + config.GITHUB_CLIENT + "&fuck=FUCK");
 })
 // for github oauth get token
 app.get(/callback/, function(req, res) {
+  res.redirect("127.0.0.1:8080") // TODO: REDIRECT TO WHERE THE USER INITIALLY CLICKED
   githubOAuth.callback(req, res);
 });
 
@@ -69,8 +70,7 @@ githubOAuth.on('error', function(err) {
 // use token to get the user id
 githubOAuth.on('token', function(token, serverResponse) {
   github.client(token.access_token).get('/user', {}, function (err, status, body, headers) {
-  console.log(body);
-
+  console.log(body, status, headers);
 });
   serverResponse.end(JSON.stringify(token))
 })
