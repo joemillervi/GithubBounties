@@ -2,18 +2,15 @@ var express = require('express');
 var bodyParser = require('body-parser');
 var db = require('./db/database');
 var app = express();
-var config = require('./config')
+var config = require('./config');
+var stripe = require('stripe')('sk_test_BQokikJOvBiI2HlWgH4olfQ2');
+var mysql = require('mysql');
+var github = require('octonode');
 var githubOAuth = require('github-oauth')({
   githubClient: config.GITHUB_CLIENT,
   githubSecret: config.GITHUB_SECRET,
   baseURL: 'http://127.0.0.1:8080',
-})
-var github = require('octonode');
-
-console.log('starting server ')
-
-var stripe = require("stripe")("sk_test_BQokikJOvBiI2HlWgH4olfQ2");
-var mysql = require('mysql');
+});
 
 var Issues = require('./models/issues');
 Issues = new Issues();
@@ -36,7 +33,7 @@ app.use(function(req, res, next) {
 var port = process.env.PORT || 3000;
 
 app.route('/api')
-  .get(function(req, res){
+  .get(function(req, res) {
     res.send('Hello World');
   });
 
@@ -51,8 +48,19 @@ app.route('/api/issues')
     });
   });
 
+app.route('/api/bounties')
+  .get(function(req, res) {
+    Issues.getBounties()
+    .then((results) => res.send(results))
+    .catch((err) => {
+      console.log(err);
+      res.statusCode = 501;
+      res.send('Unknown Server Error');
+    });
+  });  
+
 app.route('/api/repos')
-  .get(function(req, res){
+  .get(function(req, res) {
     Repos.getRepos()
     .then((results) => res.send(results))
     .catch(() => {
@@ -62,16 +70,16 @@ app.route('/api/repos')
   });
 
 app.get('/gitHubRedirect', function(req, res) {
-  res.redirect("https://github.com/login/oauth/authorize?scope=user:email&client_id=" + config.GITHUB_CLIENT);
-})
+  res.redirect('https://github.com/login/oauth/authorize?scope=user:email&client_id=' + config.GITHUB_CLIENT);
+});
 // for github oauth get token
 app.get(/callback/, function(req, res) {
   githubOAuth.callback(req, res);
 });
 
 githubOAuth.on('error', function(err) {
-  console.error('there was a login error', err)
-})
+  console.error('there was a login error', err);
+});
 
 // use token to get the user id
 githubOAuth.on('token', function(token, serverResponse) {
@@ -87,11 +95,11 @@ githubOAuth.on('token', function(token, serverResponse) {
       res.send('Unknown Server Error');
     });
   });
-  serverResponse.end(JSON.stringify(token))
-})
+  serverResponse.end(JSON.stringify(token));
+});
 
 app.route('/stripe')
-  .post(function(req, res){
+  .post(function(req, res) {
     var stripeToken = req.body.stripeToken;
     stripe.customers.create({
       source: stripeToken,
@@ -103,9 +111,9 @@ app.route('/stripe')
       .catch(() => {
         res.statusCode = 501;
         res.send('Unknown Server Error');
-      })
-    })
-  })
+      });
+    });
+  });
 
 console.log(`server running on port ${port} in ${process.env.NODE_ENV} mode`);
 // start listening to requests on port 3000
