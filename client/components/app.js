@@ -2,27 +2,15 @@ const React = require('react');
 const NavBar = require('./NavBar');
 
 const linksRight = [
-  {
-    name:"Login", url: '/login'
-  },
-  {
-    name: "Profile", url: '/profile'
-  },
-  {
-    name: "Bounties", url: '/bounties'
-  }
+  {name:"Login", url: '/login'},
+  {name: "Profile", url: '/profile'},
+  {name: "Bounties", url: '/bounties'}
 ];
 
 const linksLeft = [
-  {
-    name: "Getting Started", url: '/resources'
-  },
-  {
-    name: "Beginner's Section", url: '/'
-  },
-  {
-    name: "Repositories", url: '/repos'
-  }
+  {name: "Getting Started", url: '/resources'},
+  {name: "Beginner's Section", url: '/'},
+  {name: "Repositories", url: '/repos'}
 ];
 
 

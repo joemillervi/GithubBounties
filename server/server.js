@@ -79,6 +79,7 @@ passport.serializeUser(function(user, done) {
 
 passport.deserializeUser(function(obj, done) {
   done(null, obj);
+});
 
 passport.use(new GitHubStrategy({
     clientID: config.GITHUB_CLIENT,
@@ -140,7 +141,7 @@ app.get('/auth/github/callback',
   });
 
 app.get('/logout', function(req, res){
-  req.logout();
+  req.logout(); // passport
   res.redirect('/');
 });
 
@@ -153,9 +154,6 @@ app.get('/fetchUserInfo', function(req, res) {
   console.log('on cookie: ', req.session)
   res.json(req.session.passport.user)
 })
-// NOT SURE IF NEEDED
-//   serverResponse.end(JSON.stringify(token));
-// });
 
 app.route('/stripe')
   .post(function(req, res) {
