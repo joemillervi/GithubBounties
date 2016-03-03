@@ -2,27 +2,15 @@ const React = require('react');
 const NavBar = require('./NavBar');
 
 const linksRight = [
-  {
-    name:"Login", url: '/login'
-  },
-  {
-    name: "Profile", url: '/profile'
-  },
-  {
-    name: "Bounties", url: '/bounties'
-  }
+  {name:"Login", url: '/login'},
+  {name: "Profile", url: '/profile'},
+  {name: "Bounties", url: '/bounties'}
 ];
 
 const linksLeft = [
-  {
-    name: "Getting Started", url: '/resources'
-  },
-  {
-    name: "Beginner's Section", url: '/'
-  },
-  {
-    name: "Repositories", url: '/repos'
-  }
+  {name: "Getting Started", url: '/resources'},
+  {name: "Beginner's Section", url: '/'},
+  {name: "Repositories", url: '/repos'}
 ];
 
 
@@ -34,15 +22,32 @@ const App = class App extends React.Component {
       route: '/',
       currentUser: {
         loggedIn: false,
-        userName: ''
+        displayName: '',
+        username: ''
       }
     };
   }
-
+  fetchUserInfo() {
+    $.get( "fetchUserInfo", ( data ) => {
+      console.log(data);
+      if (data) {
+        this.setState({currentUser: {
+          loggedIn: true,
+          displayName: data.displayName,
+          username: data.username
+        }})
+      }
+    });
+  }
   render () {
     return (
     <div className='app-shell grey lighten-2'>
-      <NavBar loggedIn={this.state.currentUser.loggedIn} linksRight={linksRight} linksLeft={linksLeft}/>
+      <NavBar
+      fetchUserInfo={this.fetchUserInfo.bind(this)}
+      loggedIn={this.state.currentUser.loggedIn}
+      login={this.state.currentUser.login} l
+      linksRight={linksRight}
+      linksLeft={linksLeft}/>
       <div className="row">
         <div className="main col s12 container">
           {this.props.children}

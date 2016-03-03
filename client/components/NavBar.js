@@ -8,6 +8,7 @@ const Link = require('react-router').Link;
 const NavBar = class NavBar extends React.Component {
   constructor(props) {
     super(props);
+    this.props.fetchUserInfo();
   }
   componentDidMount () {
     $('.button-collapse').sideNav();
@@ -38,6 +39,7 @@ const NavBar = class NavBar extends React.Component {
                 <NavEntry data={link} key={index} />
               )}
             </ul>
+            <h4>{this.props.username}</h4>
             <a href="#" data-activates="nav-mobile" className="button-collapse"><i className="material-icons">menu</i></a>
 
         </nav>
