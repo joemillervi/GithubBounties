@@ -6,6 +6,8 @@ var config = {
   dbName: '',
   GITHUB_CLIENT: '',
   GITHUB_SECRET: '',
+  COINBASE_API_KEY: '',
+  COINBASE_API_SECRET: ''
 };
 
 module.exports = config;

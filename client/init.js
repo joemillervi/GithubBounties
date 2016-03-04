@@ -9,6 +9,11 @@ const TicketList = require('./components/TicketList');
 const RepoList = require('./components/RepoList');
 const RepoProfile = require('./components/RepoProfile');
 const ResourceList = require('./components/ResourceList');
+const Login = require('./components/Login');
+const Signup = require('./components/Signup');
+const Profile = require('./components/Profile');
+const BountyForm = require('./components/BountyForm');
+const BankAccountForm = require('./components/BankAccountForm');
 class Bounties extends React.Component {
   render() {
     return (
@@ -16,10 +21,6 @@ class Bounties extends React.Component {
     );
   }
 }
-const Login = require('./components/Login');
-const Signup = require('./components/Signup');
-const BountyForm = require('./components/BountyForm');
-const BankAccountForm = require('./components/BankAccountForm');
 
 ReactDOM.render((
   <Router history={hashHistory}>
@@ -31,6 +32,7 @@ ReactDOM.render((
       <Route path='bounties' component={Bounties} />
       <Route path='login' component={Login} />
       <Route path='signup' component={Signup} />
+      <Route path='profile' component={Profile} />
       <Route path='bountyForm' component={BountyForm} />
       <Route path='bankAccountForm' component={BankAccountForm} />
     </Route>
