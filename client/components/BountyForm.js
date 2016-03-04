@@ -15,7 +15,9 @@ class BountyForm extends React.Component {
         cvc: '',
         exp_month: '', //forget the camelCase linters on this one because this is how stripe wants it
         exp_year: '' //forget the camelCase linters on this one because this is how stripe wants it
-      }
+      },
+      bitCoinAddress: 'mnhjKojVScSg7FjBipNTuHozynmJYGJ3Rz"',
+      bitCoinAmount: '0.00100256'
     };
   }
 
@@ -110,6 +112,7 @@ class BountyForm extends React.Component {
     var bitCoinForm = (
       <div>
         <span>You selected BitCoin. Good luck figuring this stuff out!</span>
+        <img src={'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=bitcoin:' + this.state.bitCoinAddress + "?amount=" + this.state.bitCoinAmount} />
       </div>
     );
 
