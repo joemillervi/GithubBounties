@@ -12,7 +12,7 @@ const ResourceList = require('./components/ResourceList');
 const Login = require('./components/Login');
 const Signup = require('./components/Signup');
 const Profile = require('./components/Profile');
-const Bounty = require('./components/Bounty');
+const BountyForm = require('./components/BountyForm');
 const BankAccountForm = require('./components/BankAccountForm');
 class Bounties extends React.Component {
   render() {
@@ -33,7 +33,7 @@ ReactDOM.render((
       <Route path='login' component={Login} />
       <Route path='signup' component={Signup} />
       <Route path='profile' component={Profile} />
-      <Route path='bounty' component={Bounty} />
+      <Route path='bountyForm' component={BountyForm} />
       <Route path='bankAccountForm' component={BankAccountForm} />
     </Route>
   </Router>
