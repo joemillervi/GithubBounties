@@ -29,7 +29,7 @@ const NavBar = class NavBar extends React.Component {
               {this.props.linksRight.map ((link, index) =>
                 <NavEntry data={link} key={index} loggedIn={this.props.loggedIn}/>
               )}
-              <li className='Bounty deep-orange'><Link to={this.props.loggedIn ? '/bounty' : '/login'}>Add Bounty</Link></li>
+              <li className='Bounty deep-orange'><Link to={this.props.loggedIn ? '/bountyform' : '/login'}>Add Bounty</Link></li>
             </ul>
             <ul id="nav-mobile" className="side-nav">
               {this.props.linksRight.map ((link, index) =>

@@ -4,7 +4,6 @@ class BountyForm extends React.Component {
 
   constructor(props) {
     super(props);
-    //TODO: we will want to be able to pass in props that tell us which user is currently logged in, and whether or not they have a customer object with credit card access on file
 
     this.state = {
       issueURL: undefined, //send org_name, repo_name, number. it is saved in bountyIssues schema
@@ -17,15 +16,24 @@ class BountyForm extends React.Component {
         exp_month: '', //forget the camelCase linters on this one because this is how stripe wants it
         exp_year: '' //forget the camelCase linters on this one because this is how stripe wants it
       },
-      bitCoinAddress: '',
-      bitCoinAmount: '',
-      exchangeRateBTCUSD: '',
-      bitCoinReceived: false,
+      bitCoinAddress: '', //generated with every new bounty form
+      bitCoinAmount: '', //stored in database as Satoshis (bitcoin * 100mm)
+      exchangeRateBTCUSD: '', //fetched below
+      bitCoinReceived: false, //when true, form is submitted
+      githubId: '', //fetched below
     };
   }
 
   componentDidMount() {
     Stripe.setPublishableKey('pk_test_4SrTTNmWSmtYCG2BxAYseTE9'); // set your test public key
+
+    this.serverRequest = $.get('fetchUserInfo', function (data) {
+      // console.log('user data...................', data);
+      this.setState({
+        githubId: data.id
+      });
+    }.bind(this));
+
     this.serverRequest = $.get('http://127.0.0.1:3000/reqNewAddress', function (data) {
       console.log('new address...................', data);
       this.setState({
@@ -41,7 +49,7 @@ class BountyForm extends React.Component {
     }.bind(this));
 
     setInterval(()=> {
-      if (this.state.bitCoinAddress && this.state.bitCoinAmount > 0 ) {
+      if (this.state.bitCoinAddress && this.state.bitCoinAmount > 0 && this.state.paymentMethod === 'BitCoin') {
         this.serverRequest = $.get('https://api.blockcypher.com/v1/btc/test3/addrs/' + this.state.bitCoinAddress + '/balance', function (data) {
           console.log('address checkup...................', data);
           console.log('bitCount Amount they said they would pay', this.state.bitCoinAmount);
@@ -59,6 +67,12 @@ class BountyForm extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
+    var githubId = this.state.githubId;
+    var issueURL = this.state.issueURL;
+    var parsedURL = issueURL.split('/');
+    console.log('issueURL', issueURL);
+    console.log('parsedURL', parsedURL);
+
     Stripe.createToken(this.state.card, function (status, response) {
       console.log( status, response );
       var token = response.id;
@@ -69,7 +83,10 @@ class BountyForm extends React.Component {
         type: 'POST',
         data: {
           stripeToken: token,
-          githubId: 1 //TODO: pass down from app state as props
+          githubId: githubId,
+          org_name: parsedURL[3],
+          repo_name: parsedURL[4],
+          number: parsedURL[6], 
         },
         success: function(data) {
           console.log('data..............', data);
@@ -114,11 +131,13 @@ class BountyForm extends React.Component {
     if (this.state.issueURL) {
       var issueURL = this.state.issueURL;
       var parsedURL = issueURL.split('/');
-      var bitcoin = this.state.bitCoinAmount * 1000000;
+      var bitcoin = this.state.bitCoinAmount * 100000000;
+
+      var githubId = this.state.githubId;
 
       console.log('issueURL', issueURL);
       console.log('parsedURL', parsedURL);
-      console.log('bitcoin multipled by a million', bitcoin);
+      console.log('bitcoin in satoshis (multipled by a 100 million)', bitcoin);
 
       if (this.state.bitCoinReceived) {
         $.ajax({
@@ -126,14 +145,15 @@ class BountyForm extends React.Component {
           dataType: 'json',
           type: 'POST',
           data: {
-            bitCoinAmount: bitcoin,
+            bitCoinAmount: bitcoin, //stored in satoshis (multipled by a 100 million)
             org_name: parsedURL[3],
             repo_name: parsedURL[4],
-            number: parsedURL[6], //issue number
-            githubId: 1 //TODO: pass down from app state as props
+            number: parsedURL[6], 
+            githubId: githubId 
           },
           success: function(data) {
             console.log('data..............', data);
+            alert('Your bounty has been submitted!');
           },
           error: function(xhr, status, err) {
             console.error('/bitcoin', status, err.toString());
@@ -141,8 +161,6 @@ class BountyForm extends React.Component {
         });
       }
     }
-
-
     
     var creditCardForm = (
       <div>
@@ -178,8 +196,8 @@ class BountyForm extends React.Component {
 
     var bitCoinForm = (
       <div>
-        <span>You selected BitCoin. Good luck figuring this stuff out!</span>
         <img src={'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=bitcoin:' + this.state.bitCoinAddress + '?amount=' + this.state.bitCoinAmount} />
+        <span>Scan the QR code with your coinbase app. This will submit your bounty</span>
       </div>
     );
 
