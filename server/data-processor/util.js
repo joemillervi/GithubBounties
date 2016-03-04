@@ -265,8 +265,8 @@ var refreshIssuesFromGithub = function(issues) {
  */
 var getIssueInformation = bountyIssueQueue.createQueuedFunction(function (orgName, repoName, number, etag) {
   var options = {
-    url: `https://api.github.com/repos/${orgName}/${repoName}/issues/${number}`
-    ,headers: {'If-None-Match': etag }
+    url: `https://api.github.com/repos/${orgName}/${repoName}/issues/${number}`,
+    headers: {'If-None-Match': etag }
   };
   mergeObj(options, baseGithubOptions);
 
