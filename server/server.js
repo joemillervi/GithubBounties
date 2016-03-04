@@ -210,6 +210,7 @@ app.route('/stripeB')
   app.route('/bitcoin')
   .post(function(req, res) {
     console.log('GOT a match', req.body)
+    // Adds a bitcoin bounty
     Bounties.saveBitcoin(req.body.bitCoinAmount, req.body.org_name, req.body.repo_name, req.body.number, req.body.githubId);
   })
 
