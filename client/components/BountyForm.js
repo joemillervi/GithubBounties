@@ -7,8 +7,8 @@ class BountyForm extends React.Component {
     //TODO: we will want to be able to pass in props that tell us which user is currently logged in, and whether or not they have a customer object with credit card access on file
 
     this.state = {
-      issueURL: undefined,
-      bountyPrice: 0,
+      issueURL: undefined, //send org_name, repo_name, number. it is saved in bountyIssues schema
+      bountyPrice: 0, //store in bountyAmount in bountyIssues scehema
       bountyDescribed: false,
       paymentMethod: '',
       card: {
@@ -44,12 +44,15 @@ class BountyForm extends React.Component {
       if (this.state.bitCoinAddress && this.state.bitCoinAmount > 0 ) {
         this.serverRequest = $.get('https://api.blockcypher.com/v1/btc/test3/addrs/' + this.state.bitCoinAddress + '/balance', function (data) {
           console.log('address checkup...................', data);
-          if (this.state.bitCoinAmount === data[address]) {
+          console.log('bitCount Amount they said they would pay', this.state.bitCoinAmount);
+          console.log('bitCount Amount set to address (unconfirmed)', data['unconfirmed_balance']);
+          if (this.state.bitCoinAmount < data['unconfirmed_balance']) {
             this.setState({bitCoinReceived: true});
+            console.log('true');
           }
         }.bind(this));
       }
-    }, 5000);
+    }, 10000);
 
     console.log(this.state);
   }
@@ -107,6 +110,39 @@ class BountyForm extends React.Component {
 
   render() {
     console.log(this.state);
+
+    if (this.state.issueURL) {
+      var issueURL = this.state.issueURL;
+      var parsedURL = issueURL.split('/');
+      var bitcoin = this.state.bitCoinAmount * 1000000;
+
+      console.log('issueURL', issueURL);
+      console.log('parsedURL', parsedURL);
+      console.log('bitcoin multipled by a million', bitcoin);
+
+      if (this.state.bitCoinReceived) {
+        $.ajax({
+          url: 'http://127.0.0.1:3000/bitcoin',
+          dataType: 'json',
+          type: 'POST',
+          data: {
+            bitCoinAmount: bitcoin,
+            org_name: parsedURL[3],
+            repo_name: parsedURL[4],
+            number: parsedURL[6], //issue number
+            githubId: 1 //TODO: pass down from app state as props
+          },
+          success: function(data) {
+            console.log('data..............', data);
+          },
+          error: function(xhr, status, err) {
+            console.error('/bitcoin', status, err.toString());
+          }
+        });
+      }
+    }
+
+
     
     var creditCardForm = (
       <div>
