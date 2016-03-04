@@ -67,9 +67,9 @@ CREATE table users (
 CREATE table bountyIssues (
   internal_id int AUTO_INCREMENT PRIMARY KEY,
   id int NOT NULL,
-  number int,
-  repo_name varchar(50),
-  org_name varchar(50), 
+  number int NOT NULL,
+  repo_name varchar(50) NOT NULL,
+  org_name varchar(50) NOT NULL, 
   title varchar(2000) NOT NULL,
   comments int,
   created_at datetime,
@@ -78,12 +78,12 @@ CREATE table bountyIssues (
   assignee varchar(255),
   body varchar(1500), /* how to get this? */
   labels varchar(1000),
-  state varchar(20),
+  state varchar(20), /* ticket is open? */
   etag varchar(50),
   bountyAmount int,
+  bitCoinAmount int, /* stored in satoshis */
   bounty_user_id int,
   data_refreshed_at datetime,
-  FOREIGN KEY (bounty_user_id) REFERENCES users(internal_id)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE table pullRequests (
