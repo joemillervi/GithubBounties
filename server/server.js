@@ -171,6 +171,9 @@ app.route('/stripeCC')
   .post(function(req, res) {
     var stripeToken = req.body.stripeToken;
     var githubId = req.body.githubId;
+    var org_name = req.body.org_name;
+    var repo_name = req.body.repo_name;
+    var issueNumber = req.body.number;
     stripe.customers.create({
       source: stripeToken,
     }).then((customer) => {
@@ -178,6 +181,7 @@ app.route('/stripeCC')
       Users.saveCCPaymentId(customer.id, githubId)
       .then(() => {
         console.log('saved customer credit card payment ID to DB');
+        
       })
       .catch(() => {
         res.statusCode = 501;
