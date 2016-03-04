@@ -82,7 +82,7 @@ CREATE table bountyIssues (
   etag varchar(50),
   bountyAmount int,
   bitCoinAmount int, /* stored in satoshis */
-  bounty_user_id int,
+  bounty_user_id int, /* github user ID */
   data_refreshed_at datetime,
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
