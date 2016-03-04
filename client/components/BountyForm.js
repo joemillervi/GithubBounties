@@ -9,6 +9,7 @@ class BountyForm extends React.Component {
     this.state = {
       issueURL: undefined,
       bountyPrice: 0,
+      bountyDescribed: false,
       paymentMethod: '',
       card: {
         number: '',
@@ -16,13 +17,41 @@ class BountyForm extends React.Component {
         exp_month: '', //forget the camelCase linters on this one because this is how stripe wants it
         exp_year: '' //forget the camelCase linters on this one because this is how stripe wants it
       },
-      bitCoinAddress: 'mnhjKojVScSg7FjBipNTuHozynmJYGJ3Rz"',
-      bitCoinAmount: '0.00100256'
+      bitCoinAddress: '',
+      bitCoinAmount: '',
+      exchangeRateBTCUSD: '',
+      bitCoinReceived: false,
     };
   }
 
   componentDidMount() {
     Stripe.setPublishableKey('pk_test_4SrTTNmWSmtYCG2BxAYseTE9'); // set your test public key
+    this.serverRequest = $.get('http://127.0.0.1:3000/reqNewAddress', function (data) {
+      console.log('new address...................', data);
+      this.setState({
+        bitCoinAddress: data
+      });
+    }.bind(this));
+
+    this.serverRequest = $.getJSON('https://api.coindesk.com/v1/bpi/currentprice.json', function (data) {
+      console.log('BTC USD exhange rate...................', data);
+      this.setState({
+        exchangeRateBTCUSD: data['bpi']['USD']['rate']
+      });
+    }.bind(this));
+
+    setInterval(()=> {
+      if (this.state.bitCoinAddress && this.state.bitCoinAmount > 0 ) {
+        this.serverRequest = $.get('https://api.blockcypher.com/v1/btc/test3/addrs/' + this.state.bitCoinAddress + '/balance', function (data) {
+          console.log('address checkup...................', data);
+          if (this.state.bitCoinAmount === data[address]) {
+            this.setState({bitCoinReceived: true});
+          }
+        }.bind(this));
+      }
+    }, 5000);
+
+    console.log(this.state);
   }
 
   handleSubmit(e) {
@@ -58,13 +87,15 @@ class BountyForm extends React.Component {
   }
 
   handleIssueURLChange(e) {
-    this.setState({issueURL: e.target.value});
+    this.setState({issueURL: e.target.value}); //TODO: validate field
     console.log(this.state);
   }
 
   handleBountyPriceChange(e) {
-    var regex = /^\d+(?:\.\d{0,2})$/;
-    this.setState({bountyPrice: e.target.value.replace(regex, '')});
+    // var regex = /^\d+(?:\.\d{0,2})$/; // TODO: validate field 
+    this.setState({bountyPrice: e.target.value});
+    var bitCoinAmount = this.state.bountyPrice / this.state.exchangeRateBTCUSD;
+    this.setState({bitCoinAmount: bitCoinAmount});
     console.log(this.state);
   }
 
@@ -72,11 +103,11 @@ class BountyForm extends React.Component {
     this.setState({
       paymentMethod: e.currentTarget.id
     });
-    console.log(e.currentTarget);
   }
 
   render() {
     console.log(this.state);
+    
     var creditCardForm = (
       <div>
         <p>Note: You will not be charged until you approve and merge a pull request from a bounty hunter.</p>
@@ -112,7 +143,21 @@ class BountyForm extends React.Component {
     var bitCoinForm = (
       <div>
         <span>You selected BitCoin. Good luck figuring this stuff out!</span>
-        <img src={'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=bitcoin:' + this.state.bitCoinAddress + "?amount=" + this.state.bitCoinAmount} />
+        <img src={'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=bitcoin:' + this.state.bitCoinAddress + '?amount=' + this.state.bitCoinAmount} />
+      </div>
+    );
+
+    var paymentMethod = (
+      <div>
+        <h4>Enter Payment Information</h4> 
+        <p>
+          <input type="radio" id="Credit Card" checked={this.state.paymentMethod === 'Credit Card'} onChange={this.onPaymentMethodChange.bind(this)}/>
+          <label htmlFor="Credit Card">Pay by Credit Card</label>
+        </p>
+        <p>
+          <input type="radio" id="BitCoin" checked={this.state.paymentMethod === 'BitCoin'} onChange={this.onPaymentMethodChange.bind(this)}/>
+          <label htmlFor="BitCoin">Pay by BitCoin</label>
+        </p>
       </div>
     );
 
@@ -137,19 +182,10 @@ class BountyForm extends React.Component {
             </div>
           </div>
 
-          <h4>Enter Payment Information</h4> 
-          <p>
-            <input type="radio" id="Credit Card" checked={this.state.paymentMethod === 'Credit Card'} onChange={this.onPaymentMethodChange.bind(this)}/>
-            <label htmlFor="Credit Card">Pay by Credit Card</label>
-          </p>
-          <p>
-            <input type="radio" id="BitCoin" checked={this.state.paymentMethod === 'BitCoin'} onChange={this.onPaymentMethodChange.bind(this)}/>
-            <label htmlFor="BitCoin">Pay by BitCoin</label>
-          </p>
-
+          {this.state.issueURL && this.state.bountyPrice ? paymentMethod : null}
           {this.state.paymentMethod === 'Credit Card' ? creditCardForm : null}
           {this.state.paymentMethod === 'BitCoin' ? bitCoinForm : null}
-          {this.state.paymentMethod !== '' ? <button className="waves-effect waves-light btn" type="submit">Submit Bounty</button> : null}
+          {this.state.paymentMethod === 'Credit Card' ? <button className="waves-effect waves-light btn" type="submit">Submit Bounty</button> : null}
 
         </form>
 
