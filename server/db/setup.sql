@@ -57,7 +57,11 @@ CREATE table users (
   github_login varchar(50),
   github_name varchar(50),
   github_email varchar(50),
-  stripe_cust_id varchar(40)
+  stripe_cust_id varchar(40),
+  stripe_recipient_name varchar(40),
+  stripe_recipient_type varchar(40),
+  stripe_recipient_id varchar(40),
+  stripe_recipient_email varchar(40)
 );
 
 CREATE table bountyIssues (
