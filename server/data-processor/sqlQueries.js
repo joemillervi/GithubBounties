@@ -25,7 +25,7 @@ module.exports.reposToUpdate = `select name, org_name, etag
                                 order by data_refreshed_at asc;`;
                                 
 /**
- * Calcualtes the number of beginner tickets per repo and update sthe value in the repos table
+ * Calculates the number of beginner tickets per repo and update sthe value in the repos table
  */
 module.exports.updateBeginnerTicketCount = `update repos r
                                             left join (
@@ -33,3 +33,13 @@ module.exports.updateBeginnerTicketCount = `update repos r
                                               from issues
                                               group by repo_name, org_name) bc on bc.repo_name=r.name and bc.org_name=r.org_name
                                             set r.beginner_tickets = coalesce(bc.num_beginner_tickets, 0);`;
+
+/**
+ * Fetches all open Bounty Issues
+ */
+ module.exports.bountyIssuesToUpdate = `select org_name, repo_name, number, etag
+                                from bountyIssues
+                                where state = 'open'
+                                  and datediff(NOW(),data_refreshed_at) > 1
+                                  or data_refreshed_at is null
+                                  order by data_refreshed_at asc;`;
