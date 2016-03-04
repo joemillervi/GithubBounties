@@ -8,6 +8,9 @@ var methodOverride = require('method-override');
 var GitHubStrategy = require('passport-github2').Strategy;
 var partials = require('express-partials');
 
+// coinbase
+var Client = require('coinbase').Client;
+
 var db = require('./db/database');
 var config = require('./config')
 
@@ -171,6 +174,58 @@ app.route('/stripe')
       });
     });
   });
+
+  // coinbase authenticate our wallet
+  var client = new Client({
+    'apiKey': config.COINBASE_API_KEY,
+    'apiSecret': config.COINBASE_API_SECRET,
+    'baseApiUri': 'https://api.sandbox.coinbase.com/v2/',
+    'tokenUri': 'https://api.sandbox.coinbase.com/oauth/token'
+  });
+
+  // Create a wallet (only happens once)
+  // client.createAccount({'name': 'mongooseWallet'}, function(err, acct) {
+  //   console.log(acct.name + ': ' + acct.balance.amount + ' ' + acct.balance.currency);
+  // });
+
+  // list the wallets and transactions in our account
+  client.getAccounts({}, function(err, accounts) {
+    if (err) console.log(err);
+    else {
+      accounts.forEach(function(acct) {
+        console.log(acct.name + ': ' + acct.balance.amount + ' ' + acct.balance.currency, acct.id);
+        acct.getTransactions(null, function(err, txns) {
+          if (txns) {
+            txns.forEach(function(txn) {
+              console.log('txn: ' + txn.id);
+            });
+          }
+        });
+      });
+    }
+  });
+
+// 53f4b4cd-8a6d-58a1-8b94-d318a216d209
+app.get('/reqNewAddress', function(req, res) {
+  client.getAccount('53f4b4cd-8a6d-58a1-8b94-d318a216d209', function(err, account) {
+    if (err) console.log('get acct err', err)
+    else {
+      account.createAddress(null, function(err, addr) {
+        if (err) console.log('create address err', err);
+        else {
+          console.log('address:', addr.address)
+          res.json(addr.address)
+        }
+      });
+    }
+  });
+})
+
+
+
+
+
+
 
 console.log(`server running on port ${port} in ${process.env.NODE_ENV} mode`);
 // start listening to requests on port 3000
