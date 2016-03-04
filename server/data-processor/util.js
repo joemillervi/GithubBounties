@@ -21,13 +21,16 @@ var issueQueue = new QueueManager(30);
 //The repo API is throttled by 5000/hour but QueueManager is in minutes
 var repoQueue = new QueueManager(60, 304);
 
+//The issue API is throttled by 30 req/min
+var bountyIssueQueue = new QueueManager(30);
+
 /**Basic gitHub request information that we want to use in almost all API interactions */
 var baseGithubOptions = {
   json: true, //parses the responses body to automatically be js obj
   resolveWithFullResponse: true, //provides full reponse and not just body (so we get headers)
   headers: { 'User-Agent': 'GitBegin App' },
-  qs: {client_id: config.githubClientId,
-  client_secret: config.githubSecret}
+  qs: {client_id: config.GITHUB_CLIENT,
+  client_secret: config.GITHUB_SECRET}
 };
 
 /**Searches Github for issues w/ the provided label.
@@ -219,10 +222,101 @@ var refreshReposFromGithub = function(repos) {
   });
 };
 
+/**Accepts an array of objects ({name: ,org_name, etag:}) and updates our
+ * database w/ new information from the github api.  Returns a promise which
+ * resolves to the number of issues actually updated in the db
+ */
+var refreshIssuesFromGithub = function(issues) {
+  if(!issues) {
+    return 0;
+  }
+    //Update all issues from API
+  var countUpdates = 0;
+
+  var allIssuesGets = issues.map((issue) => {
+    return getIssueInformation(issue.org_name, issue.repo_name, issue.number, issue.etag)
+    .then((result) => {
+      var objToInsert = convertIssueToDbBountyIssues(result.body, result.headers);
+      return db('bountyIssues').where({id: objToInsert.id})
+                        .update(objToInsert)
+                        .then(() => countUpdates++);
+    })
+    .catch((result) => {
+      if(result.statusCode === 304) {
+        //Github is telling us there is no change since last time we updated
+        //It determines this based on the etag we provide in the GET request
+        console.log('no change');
+      } else {
+        console.error('Error getting new repo information', result);
+      }
+    });
+  });
+
+  return Promise.all(allIssuesGets)
+  .then(() => {
+    console.log(`Updated ${countUpdates} issues`);
+    return countUpdates;
+  });
+};
+
+/**Takes an org name, repo name, and issue id and fetches information from Github api
+ * Optionally, takes an etag.  If provided Github will only send response if there
+ * is new data since last update
+ */
+var getIssueInformation = bountyIssueQueue.createQueuedFunction(function (orgName, repoName, number, etag) {
+  var options = {
+    url: `https://api.github.com/repos/${orgName}/${repoName}/issues/${number}`
+    ,headers: {'If-None-Match': etag }
+  };
+  mergeObj(options, baseGithubOptions);
+
+  return request.get(options);
+});
+
+/**Takes a Github API bountyIssues object and converts it to an object
+ * that contains the columns we want to insert/update into our database.
+ */
+var convertIssueToDbBountyIssues = function(obj, headers) {
+  //reduce down to properties we care about
+  obj = pick(obj, ['id','number','title','comments','created_at','labels',
+          'updated_at','html_url']);
+
+  //Convert dates to JS dates so knex can reconvert back to mysql
+  var mysqlDateFormat = 'yyyy-mm-dd HH:MM:ss';
+  obj.created_at = dateFormat(obj.created_at, mysqlDateFormat);
+  obj.updated_at = dateFormat(obj.updated_at, mysqlDateFormat);
+  obj.data_refreshed_at = dateFormat(new Date(), mysqlDateFormat);
+
+  //Parse data out of html_url
+
+  var repoPath = path.parse(obj.html_url);
+  repoPath = path.parse(repoPath.dir);
+  repoPath = path.parse(repoPath.dir);  
+  obj.repo_name = repoPath.base;
+  repoPath = path.parse(repoPath.dir);  
+  obj.org_name = repoPath.base;
+
+  console.log('obj: ', obj);
+
+  if (obj.labels.length === 0) {
+    obj.labels = '';
+  }
+
+  //Add header information if provided
+  if (headers) {
+    obj.etag = headers.etag;
+  }
+
+  return obj;
+};
+
 module.exports = {
   getGithubIssuesByLabel: getGithubIssuesByLabel,
   getRepoInformation: getRepoInformation,
   convertIssueToDbIssue: convertIssueToDbIssue,
   convertRepoToDbRepo: convertRepoToDbRepo,
-  refreshReposFromGithub: refreshReposFromGithub
+  refreshReposFromGithub: refreshReposFromGithub,
+  getIssueInformation: getIssueInformation,
+  refreshIssuesFromGithub: refreshIssuesFromGithub,
+  convertIssueToDbBountyIssues: convertIssueToDbBountyIssues
 };

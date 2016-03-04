@@ -54,7 +54,7 @@ db.schema.dropTableIfExists('temp_issues')
     console.log(`Found and inserted ${result[0].affectedRows} new repos.`) :
     console.log('No new repos');
 })
-.then(() =>db.raw(sql.updateBeginnerTicketCount))
+.then(() => db.raw(sql.updateBeginnerTicketCount))
 .then(() => console.log('updated beginner ticket counts'))
 .then(() => {
   console.log(`fetch issues process FINISHED at ${new Date()}`);
@@ -65,8 +65,5 @@ db.schema.dropTableIfExists('temp_issues')
   console.error(`fetch issues process FAILED at ${new Date()}`);
   process.exit(1); //exit w/ failure
 });
-
-
-
 
 

@@ -14,27 +14,27 @@ CREATE TABLE issues ( /* beginner Issues */
   internal_id int AUTO_INCREMENT PRIMARY KEY,
   id int NOT NULL,
   number int,
-  repo_name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  org_name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, 
-  title varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  repo_name varchar(50),
+  org_name varchar(50), 
+  title varchar(2000) NOT NULL,
   comments int,
   created_at datetime,
   updated_at datetime, 
-  html_url varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, 
-  assignee varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  body varchar(1500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  labels varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
+  html_url varchar(255), 
+  assignee varchar(255),
+  body varchar(1500),
+  labels varchar(1000)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE repos ( /* beginner repos */
   internal_id int AUTO_INCREMENT PRIMARY KEY,
   id int,
-  name varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null,
-  org_name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci not null, 
-  html_url varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  language varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  name varchar(100) not null, /* repo name */
+  org_name varchar(50) not null, 
+  html_url varchar(255),
+  language varchar(100),
   beginner_tickets int,
-  description varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  description varchar(1000),
   stargazers_count int,
   watchers_count int, 
   has_wiki bool,
@@ -46,7 +46,7 @@ CREATE TABLE repos ( /* beginner repos */
   pushed_at datetime,
   data_refreshed_at datetime,
   record_inserted_at datetime,
-  etag varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  etag varchar(50),
   subscribers_count int,
   network_count int
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -64,27 +64,52 @@ CREATE table bountyIssues (
   internal_id int AUTO_INCREMENT PRIMARY KEY,
   id int NOT NULL,
   number int,
-  repo_name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  org_name varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, 
-  title varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  repo_name varchar(50),
+  org_name varchar(50), 
+  title varchar(2000) NOT NULL,
   comments int,
   created_at datetime,
   updated_at datetime, 
-  html_url varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, 
-  assignee varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  body varchar(1500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-  labels varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  html_url varchar(255), 
+  assignee varchar(255),
+  body varchar(1500), /* how to get this? */
+  labels varchar(1000),
+  state varchar(20),
+  etag varchar(50),
   bountyAmount int,
   bounty_user_id int,
+  data_refreshed_at datetime,
   FOREIGN KEY (bounty_user_id) REFERENCES users(internal_id)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE table pullRequests (
+  internal_id int AUTO_INCREMENT PRIMARY KEY,
+  id int NOT NULL,
+  number int, /* issue # */
+  repo_name varchar(50),
+  org_name varchar(50), 
+  title varchar(2000) NOT NULL,
+  comments int,
+  created_at datetime,
+  updated_at datetime, 
+  html_url varchar(255), 
+  assignee varchar(255),
+  body varchar(1500),
+  labels varchar(1000),
+  issue_id int, /* need to parse body to find this */
+  etag varchar(50),
+  pr_open bool,
+  data_refreshed_at datetime
+); /* add anything else? */
 
 CREATE table issuesUsers (
   internal_id int AUTO_INCREMENT PRIMARY KEY,
   issue_id int NOT NULL,
   user_id int NOT NULL,
+  pr_id int,
   FOREIGN KEY (user_id) REFERENCES users(internal_id),
-  FOREIGN KEY (issue_id) REFERENCES bountyIssues(internal_id)
+  FOREIGN KEY (issue_id) REFERENCES bountyIssues(internal_id),
+  FOREIGN KEY (pr_id) REFERENCES pullRequests(internal_id)
 );
 
 CREATE INDEX OrgRepo ON repos (name,org_name);

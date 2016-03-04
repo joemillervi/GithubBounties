@@ -11,7 +11,7 @@ var partials = require('express-partials');
 var db = require('./db/database');
 var config = require('./config')
 
-var stripe = require("stripe")("sk_test_BQokikJOvBiI2HlWgH4olfQ2");
+var stripe = require("stripe")("sk_test_5KBnPsmTc3iJUk7H4ZtOU3Jj");
 
 var Issues = require('./models/issues');
 Issues = new Issues();
