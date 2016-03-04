@@ -260,7 +260,20 @@ app.get('/reqNewAddress', function(req, res) {
   });
 })
 
-
+// Payout to a bitcoin bountyhunter
+app.post('/payoutBitcoin', function(req, res) {
+  client.getAccount('53f4b4cd-8a6d-58a1-8b94-d318a216d209', function(err, account) {
+    account.sendMoney({'to': req.body.address,
+    'amount': '0.01',
+    'currency': 'BTC'}, function(err, tx) {
+      if (err) console.log(err);
+      else {
+        // remove bounty from DB
+        console.log(tx);
+      }
+    });
+  });
+})
 
 console.log(`server running on port ${port} in ${process.env.NODE_ENV} mode`);
 // start listening to requests on port 3000
