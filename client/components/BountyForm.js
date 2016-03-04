@@ -195,9 +195,12 @@ class BountyForm extends React.Component {
     );
 
     var bitCoinForm = (
+      //
       <div>
-        <img src={'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=bitcoin:' + this.state.bitCoinAddress + '?amount=' + this.state.bitCoinAmount} />
-        <span>Scan the QR code with your coinbase app. This will submit your bounty</span>
+        <div>
+          <img src={'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=' + this.state.bitCoinAddress } /> 
+        </div>      
+        <span>Scan the QR code with your coinbase app. This will submit your bounty. </span>
       </div>
     );
 
