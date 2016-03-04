@@ -19,7 +19,7 @@ class Bounties extends React.Component {
 const Login = require('./components/Login');
 const Signup = require('./components/Signup');
 const BountyForm = require('./components/BountyForm');
-
+const BankAccountForm = require('./components/BankAccountForm');
 
 ReactDOM.render((
   <Router history={hashHistory}>
@@ -32,6 +32,7 @@ ReactDOM.render((
       <Route path='login' component={Login} />
       <Route path='signup' component={Signup} />
       <Route path='bountyForm' component={BountyForm} />
+      <Route path='bankAccountForm' component={BankAccountForm} />
     </Route>
   </Router>
 ), document.getElementById('app'));

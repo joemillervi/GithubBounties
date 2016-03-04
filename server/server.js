@@ -12,9 +12,9 @@ var partials = require('express-partials');
 var Client = require('coinbase').Client;
 
 var db = require('./db/database');
-var config = require('./config')
+var config = require('./config');
 
-var stripe = require("stripe")("sk_test_BQokikJOvBiI2HlWgH4olfQ2");
+var stripe = require("stripe")('sk_test_5KBnPsmTc3iJUk7H4ZtOU3Jj');
 
 var Issues = require('./models/issues');
 Issues = new Issues();
@@ -98,7 +98,7 @@ passport.use(new GitHubStrategy({
         console.log('Saved new user');
       })
       .catch((err) => {
-        console.log(err)
+        console.log(err);
         // res.statusCode = 501;
         // res.send('Unknown Server Error');
       });
@@ -106,7 +106,7 @@ passport.use(new GitHubStrategy({
       // represent the logged-in user.  In a typical application, you would want
       // to associate the GitHub account with a user record in your database,
       // and return that user instead.
-      console.log(profile)
+      console.log(profile);
       return done(null, profile);
     });
   }
@@ -127,7 +127,7 @@ app.use(passport.session());
 //   back to this application at /auth/github/callback
 app.get('/gitHubRedirect',
   passport.authenticate('github', { scope: [ 'user:email' ] }),
-  function(req, res){
+  function(req, res) {
     // The request will be redirected to GitHub for authentication, so this
     // function will not be called.
   });
@@ -143,30 +143,53 @@ app.get('/auth/github/callback',
     res.redirect('/');
   });
 
-app.get('/logout', function(req, res){
+app.get('/logout', function(req, res) {
   req.logout(); // passport
   res.redirect('/');
 });
 
 function ensureAuthenticated(req, res, next) {
   if (req.isAuthenticated()) { return next(); }
-  res.redirect('/login')
+  res.redirect('/login');
 }
 
 app.get('/fetchUserInfo', function(req, res) {
-  console.log('on cookie: ', req.session)
-  res.json(req.session.passport.user)
-})
+  console.log('on cookie: ', req.session);
+  res.json(req.session.passport.user);
+});
 
-app.route('/stripe')
+app.route('/stripeCC')
   .post(function(req, res) {
     var stripeToken = req.body.stripeToken;
+    var githubId = req.body.githubId;
     stripe.customers.create({
       source: stripeToken,
     }).then((customer) => {
-      Users.saveId(customer.id, 3) // need to pass currently logged in userID here
+      console.log('customer', customer);
+      Users.saveCCPaymentId(customer.id, githubId)
       .then(() => {
-        console.log('saved customer ID to DB');
+        console.log('saved customer credit card payment ID to DB');
+      })
+      .catch(() => {
+        res.statusCode = 501;
+        res.send('Unknown Server Error');
+      });
+    });
+  });
+
+app.route('/stripeB')
+  .post(function(req, res) {
+    var githubId = req.body.githubId;
+    stripe.recipients.create({
+      name: req.body.name,
+      type: req.body.type,
+      bank_account: req.body.stripeToken,
+      email: req.body.email
+    }).then((recipient) => {
+      console.log('recipient', recipient);
+      Users.saveBankRecipientId(recipient.name, recipient.type, recipient.id, recipient.email, githubId)
+      .then(() => {
+        console.log('saved bank account recipient ID to DB');
       })
       .catch(() => {
         res.statusCode = 501;
