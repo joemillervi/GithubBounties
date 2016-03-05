@@ -131,23 +131,24 @@ class BountyForm extends React.Component {
     console.log(this.state);
 
     if (this.state.issueURL) {
+      var githubId = this.state.githubId;
       var issueURL = this.state.issueURL;
       var parsedURL = issueURL.split('/');
       var bitcoin = this.state.bitCoinAmount * 100000000;
-
-      var githubId = this.state.githubId;
+      var received = false;
 
       console.log('issueURL', issueURL);
       console.log('parsedURL', parsedURL);
       console.log('bitcoin in satoshis (multipled by a 100 million)', bitcoin);
 
-      if (this.state.bitCoinReceived) {
+      if (this.state.bitCoinReceived && received === false) {
+        received = true;
         $.ajax({
           url: 'http://127.0.0.1:3000/bitcoin',
           dataType: 'json',
           type: 'POST',
           data: {
-            bitCoinAmount: bitcoin, //stored in satoshis (multipled by a 100 million)
+            bitcoin_amount: bitcoin, //stored in satoshis (multipled by a 100 million)
             org_name: parsedURL[3],
             repo_name: parsedURL[4],
             number: parsedURL[6], 
