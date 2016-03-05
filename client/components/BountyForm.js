@@ -114,7 +114,7 @@ class BountyForm extends React.Component {
   handleBountyPriceChange(e) {
     // var regex = /^\d+(?:\.\d{0,2})$/; // TODO: validate field 
     this.setState({bountyPrice: e.target.value});
-    var bitCoinAmount = this.state.bountyPrice / this.state.exchangeRateBTCUSD;
+    var bitCoinAmount = (this.state.bountyPrice / this.state.exchangeRateBTCUSD).toString().slice(0,10);
     this.setState({bitCoinAmount: bitCoinAmount});
     console.log(this.state);
   }
