@@ -22,9 +22,10 @@ class TicketList extends React.Component {
     var self = this;
 
     Issues.getIssues(function(data) {
+      console.log(data);
       self.setState({
         numberOfTickets: data.length,
-        ticketsToRender: data.slice(0, 199)
+        ticketsToRender: data.slice(0, 199) || []
       });
     }, console.log, searchTerm, language);
   }

@@ -27,10 +27,11 @@ class Bounties extends React.Component {
 ReactDOM.render((
   <Router history={hashHistory}>
     <Route path='/' component={App}>
-      <IndexRoute component={TicketList} />
+      <IndexRoute component={Bounties} />
       <Route path='repos' component={RepoList} />
       <Route path='repoProfile/:repoId' component={RepoProfile} />
       <Route path='resources' component={ResourceList} />
+      <Route path='beginner' component={TicketList} />
       <Route path='bounties' component={Bounties} />
       <Route path='login' component={Login} />
       <Route path='signup' component={Signup} />

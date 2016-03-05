@@ -38,6 +38,6 @@
   left: 50%;
 }
 
-.profile {
-  display: inline-block;
+#profile img{
+  border-radius: 15px;
 }
