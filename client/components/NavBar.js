@@ -10,11 +10,19 @@ const NavBar = class NavBar extends React.Component {
     super(props);
     this.props.fetchUserInfo();
   }
+
+  logout() {
+    $.get('logout', (res) => {
+      this.props.fetchUserInfo();
+    });
+  }
+
   componentDidMount () {
     $('.button-collapse').sideNav();
   }
 
   render() {
+    var logButton = this.props.loggedIn ? <li className='indigo accent-2'><a href='/' onClick={this.logout.bind(this)}>Logout</a></li> : <li className='indigo accent-2'><Link to={'/login'}>Login</Link></li>;
     return (
       <div className="navbar-fixed">
         <nav className="indigo accent-2" role="navigation">
@@ -26,6 +34,8 @@ const NavBar = class NavBar extends React.Component {
           </ul>
           <a id="logo-container" href="/" className="brand-logo center"><img src={'./rsz_b.png'} /></a>
             <ul className="right hide-on-med-and-down">
+              <li>{this.props.username}</li>
+              {logButton}
               {this.props.linksRight.map ((link, index) =>
                 <NavEntry data={link} key={index} loggedIn={this.props.loggedIn}/>
               )}
@@ -39,7 +49,6 @@ const NavBar = class NavBar extends React.Component {
                 <NavEntry data={link} key={index} />
               )}
             </ul>
-            <h4>{this.props.username}</h4>
             <a href="#" data-activates="nav-mobile" className="button-collapse"><i className="material-icons">menu</i></a>
 
         </nav>

@@ -13,7 +13,7 @@ class TicketEntry extends React.Component {
 
   claimBounty() { 
     $.post('claimBounty', {url: this.props.data.html_url}, ( data ) => {
-      console.log(data);
+      console.log('accepted bounty', data);
     });
   }
 

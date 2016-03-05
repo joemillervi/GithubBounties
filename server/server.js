@@ -321,6 +321,16 @@ app.post('/claimBounty', function(req, res) {
   res.json();
 });
 
+app.get('/fetchUserIssues', function(req, res) {
+  Issues.getUserIssues()
+  .then((results) => res.send(results))
+  .catch((err) => {
+    console.log(err);
+    res.statusCode = 501;
+    res.send('Unknown Server Error');
+  });
+});
+
 app.post('/submitPull', function(req, res) {
   console.log('pull', req.body);
   // Create handler to save it to db
