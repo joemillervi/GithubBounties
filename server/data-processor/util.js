@@ -86,7 +86,7 @@ var getAllSubsequentPages = function(url) {
       data.push(result.body);
       //Handle pagination and see if we need to iterate pages
       var links = parseLink(result.headers.link);
-      if(links.next) {
+      if (links.next) {
         return recursiveGet(links.next.url);
       } else {
         data.headers = result.headers;
@@ -134,8 +134,8 @@ var convertIssueToDbIssue = function(obj) {
 
   //Limit body value to 1500 characters
   if (typeof obj.body === 'string') {
-    obj.body = obj.body.substring(0,1499);
-    obj.body = obj.body.replace(/[^\x00-\x7F]/g, "");
+    obj.body = obj.body.substring(0, 1499);
+    obj.body = obj.body.replace(/[^\x00-\x7F]/g, '');
   } else {
     console.log('type: ', typeof obj.body);
     console.log('obj.body: ', obj.body);
@@ -161,9 +161,9 @@ var convertIssueToDbIssue = function(obj) {
  */
 var convertRepoToDbRepo = function(obj, headers) {
   //reduce down to properties we care about
-  obj = pick(obj, ['id','name','language','description','stargazers_count',
-          'watchers_count', 'has_wiki', 'has_pages','open_issues','forks','created_at',
-          'updated_at','pushed_at','html_url']);
+  obj = pick(obj, ['id', 'name', 'language', 'description', 'stargazers_count',
+          'watchers_count', 'has_wiki', 'has_pages', 'open_issues', 'forks', 'created_at',
+          'updated_at', 'pushed_at', 'html_url']);
 
 
   //Convert dates to JS dates so knex can reconvert back to mysql
@@ -191,7 +191,7 @@ var convertRepoToDbRepo = function(obj, headers) {
  * resolves to the number of repos actually updated in the db
  */
 var refreshReposFromGithub = function(repos) {
-  if(!repos) {
+  if (!repos) {
     return 0;
   }
     //Update all repos from API
@@ -206,7 +206,7 @@ var refreshReposFromGithub = function(repos) {
                         .then(() => countUpdates++);
     })
     .catch((result) => {
-      if(result.statusCode === 304) {
+      if (result.statusCode === 304) {
         //Github is telling us there is no change since last time we updated
         //It determines this based on the etag we provide in the GET request
       } else {
@@ -227,7 +227,7 @@ var refreshReposFromGithub = function(repos) {
  * resolves to the number of issues actually updated in the db
  */
 var refreshIssuesFromGithub = function(issues) {
-  if(!issues) {
+  if (!issues) {
     return 0;
   }
     //Update all issues from API
@@ -237,16 +237,17 @@ var refreshIssuesFromGithub = function(issues) {
     return getIssueInformation(issue.org_name, issue.repo_name, issue.number, issue.etag)
     .then((result) => {
       var objToInsert = convertIssueToDbBountyIssues(result.body, result.headers);
-      return db('bountyIssues').where({
-                          org_name: objToInsert.org_name,
-                          repo_name: objToInsert.repo_name,
-                          number: objToInsert.number
-                        })
-                        .update(objToInsert)
-                        .then(() => countUpdates++);
+      return db('bountyIssues')
+      .where({
+        org_name: objToInsert.org_name,
+        repo_name: objToInsert.repo_name,
+        number: objToInsert.number
+      })
+      .update(objToInsert)
+      .then(() => countUpdates++);
     })
     .catch((result) => {
-      if(result.statusCode === 304) {
+      if (result.statusCode === 304) {
         //Github is telling us there is no change since last time we updated
         //It determines this based on the etag we provide in the GET request
         console.log('no change');
@@ -282,8 +283,8 @@ var getIssueInformation = bountyIssueQueue.createQueuedFunction(function (orgNam
  */
 var convertIssueToDbBountyIssues = function(obj, headers) {
   //reduce down to properties we care about
-  obj = pick(obj, ['id','number','title','comments','created_at','labels',
-          'updated_at','html_url']);
+  obj = pick(obj, ['id', 'number', 'title', 'comments', 'created_at', 'labels',
+          'updated_at', 'html_url']);
 
   //Convert dates to JS dates so knex can reconvert back to mysql
   var mysqlDateFormat = 'yyyy-mm-dd HH:MM:ss';

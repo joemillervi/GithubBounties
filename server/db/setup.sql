@@ -83,6 +83,7 @@ CREATE table bountyIssues (
   bounty_price int,
   bitcoin_amount int, /* stored in satoshis */
   bounty_user_id int, /* github user ID */
+  bounty_paid boolean,
   data_refreshed_at datetime
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -104,13 +105,12 @@ CREATE table pullRequests (
   etag varchar(50),
   pr_open bool,
   data_refreshed_at datetime
-); /* add anything else? */
+);
 
 CREATE table issuesUsers (
   internal_id int AUTO_INCREMENT PRIMARY KEY,
   issue_id int NOT NULL, /* github_id */
-  user_id int NOT NULL, /* github user id */
-  pr_id int
+  user_id int NOT NULL /* github user id */
 );
 
 CREATE INDEX OrgRepo ON repos (name,org_name);

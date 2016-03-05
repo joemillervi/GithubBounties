@@ -8,7 +8,7 @@ var languages = [];
 
 var getIssuesFromApi = function (successCallback, errCallback) {
   var options = {
-    url: 'http://45.55.29.22:3000/api/issues',
+    url: 'http://localhost:3000/api/issues',
     type: 'GET',
     success: successCallback,
     error: errCallback
@@ -62,7 +62,6 @@ module.exports.getBounties = function(successCallback, errCallback, searchTerm, 
   //   return successCallback(issues);
   // }
   getBountiesFromApi((data) => {
-    console.log('data in bounties api call');
     issues = data;
     if (searchTerm || language) {
       return successCallback(returnFilteredIssues(searchTerm, language));

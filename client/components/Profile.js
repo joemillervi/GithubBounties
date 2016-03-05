@@ -26,6 +26,16 @@ class Profile extends React.Component {
     };
   }
 
+  fetchAcceptedIssues() {
+    $.get('fetchUserIssues', (data) => {
+      if (data) {
+        this.setState({
+          claimedIssues: data
+        });
+      }
+    });
+  }
+
   fetchUserInfo() {
     $.get( 'fetchUserInfo', ( data ) => {
       console.log(data);
@@ -105,7 +115,7 @@ class Profile extends React.Component {
     }.bind(this);
 
     $.ajax({
-      url: 'http://127.0.0.1:3000/getbitcoinamount' //TODO,
+      url: 'http://127.0.0.1:3000/getbitcoinamount', //TODO,
       dataType: 'json',
       type: 'GET',
       success: function(data) {
