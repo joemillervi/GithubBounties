@@ -25,6 +25,9 @@ Repos = new Repos();
 var Users = require('./models/users');
 Users = new Users();
 
+var Bounties = require('./models/bounties');
+Bounties = new Bounties();
+
 // configure express
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -91,17 +94,23 @@ passport.use(new GitHubStrategy({
   },
   function(accessToken, refreshToken, profile, done) {
     process.nextTick(function () {
-      // save to db
-      Users.createUser(profile)
-      .then(() => {
-        Users.createUser(profile);
-        console.log('Saved new user');
+      // save to db if user exists
+      console.log('logging out profile.id=============================================', profile.id);
+      Users.doesUserExist(profile.id).then(function(data) {
+        if (data.length === 0) {
+          Users.createUser(profile)
+          .then(() => {
+            Users.createUser(profile);
+            console.log('Saved new user');
+          })
+          .catch((err) => {
+            console.log(err);
+          })
+        }
+        else console.log('USER ALREADY EXISTS')
+      }).catch(function(err) {
+        if (err) console.log(err);
       })
-      .catch((err) => {
-        console.log(err);
-        // res.statusCode = 501;
-        // res.send('Unknown Server Error');
-      });
       // To keep the example simple, the user's GitHub profile is returned to
       // represent the logged-in user.  In a typical application, you would want
       // to associate the GitHub account with a user record in your database,
@@ -154,7 +163,7 @@ function ensureAuthenticated(req, res, next) {
 }
 
 app.get('/fetchUserInfo', function(req, res) {
-  console.log('on cookie: ', req.session);
+  // console.log('on cookie: ', req.session);
   res.json(req.session.passport.user);
 });
 
@@ -197,6 +206,13 @@ app.route('/stripeB')
       });
     });
   });
+
+  app.route('/bitcoin')
+  .post(function(req, res) {
+    console.log('GOT a match', req.body)
+    // Adds a bitcoin bounty
+    Bounties.saveBitcoin(req.body.bitCoinAmount, req.body.org_name, req.body.repo_name, req.body.number, req.body.githubId);
+  })
 
   // coinbase authenticate our wallet
   var client = new Client({
@@ -243,10 +259,6 @@ app.get('/reqNewAddress', function(req, res) {
     }
   });
 })
-
-
-
-
 
 
 
