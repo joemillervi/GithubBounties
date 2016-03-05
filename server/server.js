@@ -115,7 +115,7 @@ passport.use(new GitHubStrategy({
       // represent the logged-in user.  In a typical application, you would want
       // to associate the GitHub account with a user record in your database,
       // and return that user instead.
-      console.log(profile);
+      // console.log(profile);
       return done(null, profile);
     });
   }
@@ -222,10 +222,10 @@ app.route('/stripeB')
     'tokenUri': 'https://api.coinbase.com/oauth/token'
   });
 
-  Create a wallet (only happens once)
-  client.createAccount({'name': 'mongooseWallet'}, function(err, acct) {
-    console.log(acct.name + ': ' + acct.balance.amount + ' ' + acct.balance.currency);
-  });
+  // Create a wallet (only happens once)
+  // client.createAccount({'name': 'mongooseWallet'}, function(err, acct) {
+  //   console.log(acct.name + ': ' + acct.balance.amount + ' ' + acct.balance.currency);
+  // });
 
   // list the wallets and transactions in our account
   client.getAccounts({}, function(err, accounts) {
@@ -264,7 +264,7 @@ app.get('/reqNewAddress', function(req, res) {
 app.post('/payoutBitcoin', function(req, res) {
   client.getAccount('80113505-bb59-5d0d-88b0-c6bd2c6d4a1a', function(err, account) {
     account.sendMoney({'to': req.body.address,
-    'amount': '0.01',
+    'amount': '0.001',
     'currency': 'BTC'}, function(err, tx) {
       if (err) console.log(err);
       else {

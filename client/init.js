@@ -14,6 +14,8 @@ const Signup = require('./components/Signup');
 const Profile = require('./components/Profile');
 const BountyForm = require('./components/BountyForm');
 const BankAccountForm = require('./components/BankAccountForm');
+const BitCoinPaymentForm = require('./components/BitCoinPaymentForm');
+
 class Bounties extends React.Component {
   render() {
     return (
@@ -35,6 +37,7 @@ ReactDOM.render((
       <Route path='profile' component={Profile} />
       <Route path='bountyForm' component={BountyForm} />
       <Route path='bankAccountForm' component={BankAccountForm} />
+      <Route path='bitcoinpaymentform' component={BitCoinPaymentForm} />
     </Route>
   </Router>
 ), document.getElementById('app'));
