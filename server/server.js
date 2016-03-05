@@ -89,37 +89,45 @@ passport.deserializeUser(function(obj, done) {
 });
 
 passport.use(new GitHubStrategy({
-    clientID: config.GITHUB_CLIENT,
-    clientSecret: config.GITHUB_SECRET,
-    callbackURL: 'http://127.0.0.1:3000/auth/github/callback'
-}, function(accessToken, refreshToken, profile, done) {
-  process.nextTick(function () {
-    // save to db if user exists
-    console.log('logging out profile.id=============================================', profile.id);
-    Users.doesUserExist(profile.id).then(function(data) {
-      if (data.length === 0) {
-        Users.createUser(profile)
-        .then(() => {
-          Users.createUser(profile);
-          console.log('Saved new user');
-        })
-        .catch((err) => {
+  clientID: config.GITHUB_CLIENT,
+  clientSecret: config.GITHUB_SECRET,
+  callbackURL: 'http://127.0.0.1:3000/auth/github/callback'
+},
+  function(accessToken, refreshToken, profile, done) {
+    process.nextTick(function () {
+      // save to db if user exists
+      console.log('profile: ', profile);
+      Users.doesUserExist(profile.id).then(function(data) {
+        if (data.length === 0) {
+          var userData = {
+            id: profile.id,
+            username: profile.username,
+            name: profile.displayName,
+            email: profile.emails[0].value
+          };
+          Users.createUser(userData)
+          .then(() => {
+            console.log('Saved new user');
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+        } else {
+          console.log('USER ALREADY EXISTS');
+        }
+      }).catch(function(err) {
+        if (err) {
           console.log(err);
-        });
-      } else {
-        console.error('USER ALREADY EXISTS');
-      }
-    }).catch(function(err) {
-      console.log(err);
+        }
+      });
+      // To keep the example simple, the user's GitHub profile is returned to
+      // represent the logged-in user.  In a typical application, you would want
+      // to associate the GitHub account with a user record in your database,
+      // and return that user instead.
+      // console.log(profile);
+      return done(null, profile);
     });
-    // To keep the example simple, the user's GitHub profile is returned to
-    // represent the logged-in user.  In a typical application, you would want
-    // to associate the GitHub account with a user record in your database,
-    // and return that user instead.
-    console.log(profile);
-    return done(null, profile);
-  });
-}
+  }
 ));
 
 app.use(partials());
@@ -172,18 +180,40 @@ app.route('/stripeCC')
   .post(function(req, res) {
     var stripeToken = req.body.stripeToken;
     var githubId = req.body.githubId;
+    var org_name = req.body.org_name;
+    var repo_name = req.body.repo_name;
+    var issueNumber = req.body.number;
+    var bountyPrice = req.body.bountyPrice;
     stripe.customers.create({
       source: stripeToken,
     }).then((customer) => {
-      console.log('customer', customer);
       Users.saveCCPaymentId(customer.id, githubId)
       .then(() => {
-        console.log('saved customer credit card payment ID to DB');
-      })
+        Bounties.saveIssue(githubId, org_name, repo_name, issueNumber, bountyPrice)
+        .then((bounty) => {
+          console.log('succesfully added bounty: ', bounty);
+          Bounties.updateIssue(bounty[0])
+          .then(() => {
+            console.log('succesfully updated bounty');
+          })
+          .catch((err) => {
+            console.log('Error updating bounty: ', err);
+          });
+        })
+        .catch((err) => {
+          console.log('Error adding bounty: ', err);
+          res.statusCode = 501;
+          res.send('Error adding bounty');
+        });
+      }) // should update this record immediately
       .catch(() => {
         res.statusCode = 501;
-        res.send('Unknown Server Error');
+        res.send('Error adding payment data');
       });
+    })
+    .catch(() => {
+      res.statusCode = 501;
+      res.send('Unknown Server Error');
     });
   });
 
@@ -197,14 +227,14 @@ app.route('/stripeB')
       email: req.body.email
     }).then((recipient) => {
       console.log('recipient', recipient);
-      Users.saveBankRecipientId(recipient.name, recipient.type, recipient.id, recipient.email, githubId)
-      .then(() => {
-        console.log('saved bank account recipient ID to DB');
-      })
-      .catch(() => {
-        res.statusCode = 501;
-        res.send('Unknown Server Error');
-      });
+      Users.saveBankRecipientId(recipient.name, recipient.type, recipient.id, recipient.email, githubId);
+    })
+    .then(() => {
+      console.log('saved bank account recipient ID to DB');
+    })
+    .catch(() => {
+      res.statusCode = 501;
+      res.send('Unknown Server Error');
     });
   });
 
@@ -219,8 +249,8 @@ app.route('/bitcoin')
 var client = new Client({
   'apiKey': config.COINBASE_API_KEY,
   'apiSecret': config.COINBASE_API_SECRET,
-  'baseApiUri': 'https://api.sandbox.coinbase.com/v2/',
-  'tokenUri': 'https://api.sandbox.coinbase.com/oauth/token'
+  'baseApiUri': 'https://api.coinbase.com/v2/',
+  'tokenUri': 'https://api.coinbase.com/oauth/token'
 });
 
   // Create a wallet (only happens once)
@@ -248,7 +278,8 @@ client.getAccounts({}, function(err, accounts) {
 
 // 53f4b4cd-8a6d-58a1-8b94-d318a216d209
 app.get('/reqNewAddress', function(req, res) {
-  client.getAccount('53f4b4cd-8a6d-58a1-8b94-d318a216d209', function(err, account) {
+
+  client.getAccount('80113505-bb59-5d0d-88b0-c6bd2c6d4a1a', function(err, account) {
     if (err) {
       console.log('get acct err', err);
     } else {
@@ -264,6 +295,7 @@ app.get('/reqNewAddress', function(req, res) {
   });
 });
 
+
 app.post('/claimBounty', function(req, res) {
   console.log(req.body);
   res.json();
@@ -273,6 +305,23 @@ app.post('/submitPull', function(req, res) {
   console.log('pull', req.body);
   res.json(req.session.passport.user);
 });
+
+// Payout to a bitcoin bountyhunter
+app.post('/payoutBitcoin', function(req, res) {
+  client.getAccount('80113505-bb59-5d0d-88b0-c6bd2c6d4a1a', function(err, account) {
+    account.sendMoney({'to': req.body.address,
+    'amount': '0.001',
+    'currency': 'BTC'}, function(err, tx) {
+      if (err) {
+        console.log(err);
+      } else {
+        // remove bounty from DB
+        console.log(tx);
+      }
+    });
+  });
+});
+
 
 console.log(`server running on port ${port} in ${process.env.NODE_ENV} mode`);
 // start listening to requests on port 3000
