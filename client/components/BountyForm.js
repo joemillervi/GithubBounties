@@ -21,7 +21,7 @@ class BountyForm extends React.Component {
       exchangeRateBTCUSD: '', //fetched below
       bitCoinReceived: false, //when true, form is submitted
       githubId: '', //fetched below
-      receivedPayment: true // bitcoin has been submitted
+      receivedPayment: false // bitcoin has been submitted
     };
   }
 
@@ -130,7 +130,7 @@ class BountyForm extends React.Component {
   render() {
     if (this.state.receivedPayment) {
       setTimeout(function(){
-        this.transitionTo('/profile')
+        window.location = "http://127.0.0.1:3000/";
       }.bind(this), 1500)
     }
 
