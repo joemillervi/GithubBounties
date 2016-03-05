@@ -14,7 +14,7 @@ var Client = require('coinbase').Client;
 var db = require('./db/database');
 var config = require('./config');
 
-var stripe = require("stripe")('sk_test_5KBnPsmTc3iJUk7H4ZtOU3Jj');
+var stripe = require('stripe')('sk_test_5KBnPsmTc3iJUk7H4ZtOU3Jj');
 
 var Issues = require('./models/issues');
 Issues = new Issues();
@@ -59,6 +59,7 @@ app.route('/api/issues')
 
 app.route('/api/bounties')
   .get(function(req, res) {
+    console.log('bounties call');
     Issues.getBounties()
     .then((results) => res.send(results))
     .catch((err) => {
@@ -90,35 +91,35 @@ passport.deserializeUser(function(obj, done) {
 passport.use(new GitHubStrategy({
     clientID: config.GITHUB_CLIENT,
     clientSecret: config.GITHUB_SECRET,
-    callbackURL: "http://127.0.0.1:3000/auth/github/callback"
-  },
-  function(accessToken, refreshToken, profile, done) {
-    process.nextTick(function () {
-      // save to db if user exists
-      console.log('logging out profile.id=============================================', profile.id);
-      Users.doesUserExist(profile.id).then(function(data) {
-        if (data.length === 0) {
-          Users.createUser(profile)
-          .then(() => {
-            Users.createUser(profile);
-            console.log('Saved new user');
-          })
-          .catch((err) => {
-            console.log(err);
-          })
-        }
-        else console.log('USER ALREADY EXISTS')
-      }).catch(function(err) {
-        if (err) console.log(err);
-      })
-      // To keep the example simple, the user's GitHub profile is returned to
-      // represent the logged-in user.  In a typical application, you would want
-      // to associate the GitHub account with a user record in your database,
-      // and return that user instead.
-      console.log(profile);
-      return done(null, profile);
+    callbackURL: 'http://127.0.0.1:3000/auth/github/callback'
+}, function(accessToken, refreshToken, profile, done) {
+  process.nextTick(function () {
+    // save to db if user exists
+    console.log('logging out profile.id=============================================', profile.id);
+    Users.doesUserExist(profile.id).then(function(data) {
+      if (data.length === 0) {
+        Users.createUser(profile)
+        .then(() => {
+          Users.createUser(profile);
+          console.log('Saved new user');
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+      } else {
+        console.error('USER ALREADY EXISTS');
+      }
+    }).catch(function(err) {
+      console.log(err);
     });
-  }
+    // To keep the example simple, the user's GitHub profile is returned to
+    // represent the logged-in user.  In a typical application, you would want
+    // to associate the GitHub account with a user record in your database,
+    // and return that user instead.
+    console.log(profile);
+    return done(null, profile);
+  });
+}
 ));
 
 app.use(partials());
@@ -157,10 +158,10 @@ app.get('/logout', function(req, res) {
   res.redirect('/');
 });
 
-function ensureAuthenticated(req, res, next) {
+var ensureAuthenticated = function (req, res, next) {
   if (req.isAuthenticated()) { return next(); }
   res.redirect('/login');
-}
+};
 
 app.get('/fetchUserInfo', function(req, res) {
   // console.log('on cookie: ', req.session);
@@ -207,20 +208,20 @@ app.route('/stripeB')
     });
   });
 
-  app.route('/bitcoin')
-  .post(function(req, res) {
-    console.log('GOT a match', req.body)
-    // Adds a bitcoin bounty
-    Bounties.saveBitcoin(req.body.bitCoinAmount, req.body.org_name, req.body.repo_name, req.body.number, req.body.githubId);
-  })
+app.route('/bitcoin')
+.post(function(req, res) {
+  console.log('GOT a match', req.body);
+  // Adds a bitcoin bounty
+  Bounties.saveBitcoin(req.body.bitCoinAmount, req.body.org_name, req.body.repo_name, req.body.number, req.body.githubId);
+});
 
   // coinbase authenticate our wallet
-  var client = new Client({
-    'apiKey': config.COINBASE_API_KEY,
-    'apiSecret': config.COINBASE_API_SECRET,
-    'baseApiUri': 'https://api.sandbox.coinbase.com/v2/',
-    'tokenUri': 'https://api.sandbox.coinbase.com/oauth/token'
-  });
+var client = new Client({
+  'apiKey': config.COINBASE_API_KEY,
+  'apiSecret': config.COINBASE_API_SECRET,
+  'baseApiUri': 'https://api.sandbox.coinbase.com/v2/',
+  'tokenUri': 'https://api.sandbox.coinbase.com/oauth/token'
+});
 
   // Create a wallet (only happens once)
   // client.createAccount({'name': 'mongooseWallet'}, function(err, acct) {
@@ -228,39 +229,50 @@ app.route('/stripeB')
   // });
 
   // list the wallets and transactions in our account
-  client.getAccounts({}, function(err, accounts) {
-    if (err) console.log(err);
-    else {
-      accounts.forEach(function(acct) {
-        console.log(acct.name + ': ' + acct.balance.amount + ' ' + acct.balance.currency, acct.id);
-        acct.getTransactions(null, function(err, txns) {
-          if (txns) {
-            txns.forEach(function(txn) {
-              console.log('txn: ' + txn.id);
-            });
-          }
-        });
+client.getAccounts({}, function(err, accounts) {
+  if (err) { 
+    console.log(err); 
+  } else {
+    accounts.forEach(function(acct) {
+      console.log(acct.name + ': ' + acct.balance.amount + ' ' + acct.balance.currency, acct.id);
+      acct.getTransactions(null, function(err, txns) {
+        if (txns) {
+          txns.forEach(function(txn) {
+            console.log('txn: ' + txn.id);
+          });
+        }
       });
-    }
-  });
+    });
+  }
+});
 
 // 53f4b4cd-8a6d-58a1-8b94-d318a216d209
 app.get('/reqNewAddress', function(req, res) {
   client.getAccount('53f4b4cd-8a6d-58a1-8b94-d318a216d209', function(err, account) {
-    if (err) console.log('get acct err', err)
-    else {
+    if (err) {
+      console.log('get acct err', err);
+    } else {
       account.createAddress(null, function(err, addr) {
-        if (err) console.log('create address err', err);
-        else {
-          console.log('address:', addr.address)
-          res.json(addr.address)
+        if (err) {
+          console.log('create address err', err);
+        } else {
+          console.log('address:', addr.address);
+          res.json(addr.address);
         }
       });
     }
   });
-})
+});
 
+app.post('/claimBounty', function(req, res) {
+  console.log(req.body);
+  res.json();
+});
 
+app.post('/submitPull', function(req, res) {
+  console.log('pull', req.body);
+  res.json(req.session.passport.user);
+});
 
 console.log(`server running on port ${port} in ${process.env.NODE_ENV} mode`);
 // start listening to requests on port 3000
