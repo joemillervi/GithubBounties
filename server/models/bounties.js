@@ -15,7 +15,8 @@ Bounties.prototype.saveIssue = function (githubId, org_name, repo_name, issueNum
     org_name: org_name,
     bounty_price: bountyPrice,
     bounty_user_id: githubId,
-    bitcoin_amount: bitcoin_amount
+    bitcoin_amount: bitcoin_amount,
+    bounty_paid: false
   })
 };
 

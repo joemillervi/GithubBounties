@@ -313,12 +313,19 @@ app.get('/reqNewAddress', function(req, res) {
   });
 });
 
-
-app.post('/claimBounty', function(req, res) {
+app.post('/addToQueue', function(req, res) {
   console.log('bounty', req.body);
-  var user = req.session.passport.user;
-    // Create handler to save it to db
-  res.json();
+  var issue_id = req.body.data.id;
+  var user_id = req.session.passport.user.id;
+  Users.addToQueue(issue_id, user_id)
+  .then(() => {
+    console.log("Successfully added bounty to queue");
+    res.status(200).send('Success');
+  })
+  .catch((err) => {
+    console.log('Error adding bounty to queue: ',err);
+    res.status(501).send('Error adding bounty');
+  })
 });
 
 app.post('/submitPull', function(req, res) {
