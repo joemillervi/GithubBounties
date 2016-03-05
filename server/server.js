@@ -96,11 +96,17 @@ passport.use(new GitHubStrategy({
     process.nextTick(function () {
       // save to db if user exists
       console.log('logging out profile.id=============================================', profile.id);
+      console.log('profile: ', profile)
       Users.doesUserExist(profile.id).then(function(data) {
         if (data.length === 0) {
-          Users.createUser(profile)
+          var userData = {
+            id: profile.id,
+            username: profile.username,
+            name: profile.displayName,
+            email: profile.emails[0].value
+          }
+          Users.createUser(userData)
           .then(() => {
-            Users.createUser(profile);
             console.log('Saved new user');
           })
           .catch((err) => {
@@ -171,18 +177,40 @@ app.route('/stripeCC')
   .post(function(req, res) {
     var stripeToken = req.body.stripeToken;
     var githubId = req.body.githubId;
+    var org_name = req.body.org_name;
+    var repo_name = req.body.repo_name;
+    var issueNumber = req.body.number;
+    var bountyPrice = req.body.bountyPrice;
     stripe.customers.create({
       source: stripeToken,
     }).then((customer) => {
-      console.log('customer', customer);
       Users.saveCCPaymentId(customer.id, githubId)
       .then(() => {
-        console.log('saved customer credit card payment ID to DB');
-      })
+        Bounties.saveIssue(githubId, org_name, repo_name, issueNumber, bountyPrice)
+        .then((bounty) => {
+          console.log('succesfully added bounty: ', bounty);
+          Bounties.updateIssue(bounty[0])
+          .then(() => {
+            console.log('succesfully updated bounty');
+          })
+          .catch((err) => {
+            console.log('Error updating bounty: ', err);
+          })
+        })
+        .catch((err) => {
+          console.log('Error adding bounty: ',err);
+          res.statusCode = 501;
+          res.send('Error adding bounty');
+        })
+      }) // should update this record immediately
       .catch(() => {
         res.statusCode = 501;
-        res.send('Unknown Server Error');
-      });
+        res.send('Error adding payment data');
+      })
+    })
+    .catch(() => {
+      res.statusCode = 501;
+      res.send('Unknown Server Error');
     });
   });
 
@@ -197,13 +225,13 @@ app.route('/stripeB')
     }).then((recipient) => {
       console.log('recipient', recipient);
       Users.saveBankRecipientId(recipient.name, recipient.type, recipient.id, recipient.email, githubId)
-      .then(() => {
-        console.log('saved bank account recipient ID to DB');
-      })
-      .catch(() => {
-        res.statusCode = 501;
-        res.send('Unknown Server Error');
-      });
+    })
+    .then(() => {
+      console.log('saved bank account recipient ID to DB');
+    })
+    .catch(() => {
+      res.statusCode = 501;
+      res.send('Unknown Server Error');
     });
   });
 
