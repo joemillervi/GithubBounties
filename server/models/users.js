@@ -5,6 +5,8 @@ var Users = function() {
 };
 
 Users.prototype.saveCCPaymentId = function (custId, githubId) {
+  githubId = Number(githubId);
+
   return db('users')
   .where({github_id: githubId})
   .update({stripe_cust_id: custId})
@@ -30,7 +32,7 @@ Users.prototype.saveBankRecipientId = function (recipientName, recipientType, re
 Users.prototype.createUser = function (customer) {
   return db('users').insert({
     github_id: customer.id,
-    github_login: customer.login,
+    github_username: customer.username,
     github_name: customer.name,
     github_email: customer.email
   })
