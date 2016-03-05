@@ -237,7 +237,11 @@ var refreshIssuesFromGithub = function(issues) {
     return getIssueInformation(issue.org_name, issue.repo_name, issue.number, issue.etag)
     .then((result) => {
       var objToInsert = convertIssueToDbBountyIssues(result.body, result.headers);
-      return db('bountyIssues').where({id: objToInsert.id})
+      return db('bountyIssues').where({
+                          org_name: objToInsert.org_name,
+                          repo_name: objToInsert.repo_name,
+                          number: objToInsert.number
+                        })
                         .update(objToInsert)
                         .then(() => countUpdates++);
     })

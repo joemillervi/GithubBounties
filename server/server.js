@@ -187,8 +187,15 @@ app.route('/stripeCC')
       Users.saveCCPaymentId(customer.id, githubId)
       .then(() => {
         Bounties.saveIssue(githubId, org_name, repo_name, issueNumber, bountyPrice)
-        .then(() => {
-          console.log('succesfully added bounty');
+        .then((bounty) => {
+          console.log('succesfully added bounty: ', bounty);
+          Bounties.updateIssue(bounty[0])
+          .then(() => {
+            console.log('succesfully updated bounty');
+          })
+          .catch((err) => {
+            console.log('Error updating bounty: ', err);
+          })
         })
         .catch((err) => {
           console.log('Error adding bounty: ',err);
