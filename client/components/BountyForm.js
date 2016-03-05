@@ -50,7 +50,7 @@ class BountyForm extends React.Component {
 
     setInterval(()=> {
       if (this.state.bitCoinAddress && this.state.bitCoinAmount > 0 && this.state.paymentMethod === 'BitCoin') {
-        this.serverRequest = $.get('https://api.blockcypher.com/v1/btc/test3/addrs/' + this.state.bitCoinAddress + '/balance', function (data) {
+        this.serverRequest = $.get('https://api.blockcypher.com/v1/btc/main/addrs/' + this.state.bitCoinAddress + '/balance', function (data) {
           console.log('address checkup...................', data);
           console.log('bitCount Amount they said they would pay', this.state.bitCoinAmount);
           console.log('bitCount Amount set to address (unconfirmed)', data['unconfirmed_balance']);
@@ -195,12 +195,9 @@ class BountyForm extends React.Component {
     );
 
     var bitCoinForm = (
-      //
       <div>
-        <div>
-          <img src={'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=' + this.state.bitCoinAddress } /> 
-        </div>      
-        <span>Scan the QR code with your coinbase app. This will submit your bounty. </span>
+        <img src={'https://chart.googleapis.com/chart?chs=300x300&cht=qr&chl=bitcoin:' + this.state.bitCoinAddress + '?amount=' + this.state.bitCoinAmount} />
+        <span>Scan the QR code with your coinbase app. This will submit your bounty</span>
       </div>
     );
 
