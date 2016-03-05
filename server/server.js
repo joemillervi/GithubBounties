@@ -211,21 +211,27 @@ app.route('/stripeCC')
 app.route('/stripeB')
   .post(function(req, res) {
     var githubId = req.body.githubId;
+    console.log('req.body: ', req.body);
     stripe.recipients.create({
       name: req.body.name,
       type: req.body.type,
-      bank_account: req.body.stripeToken,
+      bank_account: req.body.bank_account,
       email: req.body.email
-    }).then((recipient) => {
+    })
+    .then((recipient) => {
       console.log('recipient', recipient);
       Users.saveBankRecipientId(recipient.name, recipient.type, recipient.id, recipient.email, githubId)
+      .then(() => {
+        console.log('saved bank account recipient ID to DB');
+      })
+      .catch(() => {
+        res.status(501).send('Unknown Server Error');
+      });
     })
-    .then(() => {
-      console.log('saved bank account recipient ID to DB');
-    })
-    .catch(() => {
+    .catch((err) => {
+      console.log('error');
       res.status(501).send('Unknown Server Error');
-    });
+    })
   });
 
   app.route('/bitcoin')

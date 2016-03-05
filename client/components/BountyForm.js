@@ -28,7 +28,6 @@ class BountyForm extends React.Component {
     Stripe.setPublishableKey('pk_test_4SrTTNmWSmtYCG2BxAYseTE9'); // set your test public key
 
     this.serverRequest = $.get('fetchUserInfo', function (data) {
-      // console.log('user data...................', data);
       this.setState({
         githubId: data.id
       });
@@ -155,7 +154,6 @@ class BountyForm extends React.Component {
             githubId: githubId 
           },
           success: function(data) {
-            console.log('data..............', data);
             alert('Your bounty has been submitted!');
           },
           error: function(xhr, status, err) {
