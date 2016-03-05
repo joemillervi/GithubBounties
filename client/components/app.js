@@ -9,7 +9,7 @@ const linksRight = [
 
 const linksLeft = [
   {name: 'Getting Started', url: '/resources'},
-  {name: 'Beginner\'s Section', url: '/'},
+  {name: 'Beginner\'s Section', url: '/beginner'},
   {name: 'Repositories', url: '/repos'}
 ];
 
