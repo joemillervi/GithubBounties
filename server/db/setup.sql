@@ -15,12 +15,12 @@ CREATE TABLE issues ( /* beginner Issues */
   id int NOT NULL,
   number int,
   repo_name varchar(50),
-  org_name varchar(50), 
+  org_name varchar(50),
   title varchar(2000) NOT NULL,
   comments int,
   created_at datetime,
-  updated_at datetime, 
-  html_url varchar(255), 
+  updated_at datetime,
+  html_url varchar(255),
   assignee varchar(255),
   body varchar(1500),
   labels varchar(1000)
@@ -30,19 +30,19 @@ CREATE TABLE repos ( /* beginner repos */
   internal_id int AUTO_INCREMENT PRIMARY KEY,
   id int,
   name varchar(100) not null, /* repo name */
-  org_name varchar(50) not null, 
+  org_name varchar(50) not null,
   html_url varchar(255),
   language varchar(100),
   beginner_tickets int,
   description varchar(1000),
   stargazers_count int,
-  watchers_count int, 
+  watchers_count int,
   has_wiki bool,
-  has_pages bool, 
-  open_issues int, 
+  has_pages bool,
+  open_issues int,
   forks int,
   created_at datetime,
-  updated_at datetime, 
+  updated_at datetime,
   pushed_at datetime,
   data_refreshed_at datetime,
   record_inserted_at datetime,
@@ -69,12 +69,12 @@ CREATE table bountyIssues (
   id int,
   number int NOT NULL,
   repo_name varchar(50) NOT NULL,
-  org_name varchar(50) NOT NULL, 
+  org_name varchar(50) NOT NULL,
   title varchar(2000),
   comments int,
   created_at datetime,
-  updated_at datetime, 
-  html_url varchar(255), 
+  updated_at datetime,
+  html_url varchar(255),
   assignee varchar(255),
   body varchar(1500), /* how to get this? */
   labels varchar(1000),
@@ -83,7 +83,8 @@ CREATE table bountyIssues (
   bounty_price int,
   bitcoin_amount int, /* stored in satoshis */
   bounty_user_id int, /* github user ID */
-  data_refreshed_at datetime
+  data_refreshed_at datetime,
+  completed boolean /* bounty has been claimed */
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE table pullRequests (
@@ -91,12 +92,12 @@ CREATE table pullRequests (
   id int NOT NULL,
   number int, /* issue # */
   repo_name varchar(50),
-  org_name varchar(50), 
+  org_name varchar(50),
   title varchar(2000) NOT NULL,
   comments int,
   created_at datetime,
-  updated_at datetime, 
-  html_url varchar(255), 
+  updated_at datetime,
+  html_url varchar(255),
   assignee varchar(255),
   body varchar(1500),
   labels varchar(1000),

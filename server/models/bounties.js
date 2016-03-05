@@ -7,7 +7,7 @@ var Bounties = function() {
 
 Bounties.prototype.saveIssue = function (githubId, org_name, repo_name, issueNumber, bountyPrice) {
   return db('bountyIssues').insert({
-    number: issueNumber, 
+    number: issueNumber,
     repo_name: repo_name,
     org_name: org_name,
     bounty_price: bountyPrice,
@@ -47,7 +47,7 @@ Bounties.prototype.removeBounty = function (url) {
   return db('bountyIssues')
     .where({html_url: url})
     .update({
-      state: 'done'
+      completed: true
     })
 };
 
