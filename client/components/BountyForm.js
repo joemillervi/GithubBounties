@@ -21,6 +21,7 @@ class BountyForm extends React.Component {
       exchangeRateBTCUSD: '', //fetched below
       bitCoinReceived: false, //when true, form is submitted
       githubId: '', //fetched below
+      receivedPayment: false // bitcoin has been submitted
     };
   }
 
@@ -90,7 +91,7 @@ class BountyForm extends React.Component {
           bountyPrice: bountyPrice
         },
         success: function(data) {
-          console.log('data..............', data);
+          console.log('data:', data);
         },
         error: function(xhr, status, err) {
           console.error('/stripeCC', status, err.toString());
@@ -134,14 +135,13 @@ class BountyForm extends React.Component {
       var issueURL = this.state.issueURL;
       var parsedURL = issueURL.split('/');
       var bitcoin = this.state.bitCoinAmount * 100000000;
-      var received = false;
 
       console.log('issueURL', issueURL);
       console.log('parsedURL', parsedURL);
       console.log('bitcoin in satoshis (multipled by a 100 million)', bitcoin);
 
-      if (this.state.bitCoinReceived && received === false) {
-        received = true;
+      if (this.state.bitCoinReceived && this.state.receivedPayment === false) {
+        this.setState({'receivedPayment': true});
         $.ajax({
           url: 'http://127.0.0.1:3000/bitcoin',
           dataType: 'json',

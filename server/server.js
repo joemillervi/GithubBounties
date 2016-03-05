@@ -177,7 +177,7 @@ app.route('/stripeCC')
     var org_name = req.body.org_name;
     var repo_name = req.body.repo_name;
     var issueNumber = req.body.number;
-    var bountyPrice = req.body.bountyPrice;
+    var bountyPrice = Math.round(req.body.bountyPrice);
     stripe.customers.create({
       source: stripeToken,
     }).then((customer) => {
