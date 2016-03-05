@@ -14,12 +14,19 @@ class BankAccountForm extends React.Component {
         account_number: '', //forget the camelCase linters on this one because this is how stripe wants it
         name: '', //forget the camelCase linters on this one because this is how stripe wants it
         account_holder_type: '' //forget the camelCase linters on this one because this is how stripe wants it
-      }
+      },
+      githubId: ''
     };
   }
 
   componentDidMount() {
     Stripe.setPublishableKey('pk_test_4SrTTNmWSmtYCG2BxAYseTE9'); // set your test public key
+
+    this.serverRequest = $.get('fetchUserInfo', function (data) {
+      this.setState({
+        githubId: data.id
+      });
+    }.bind(this));
   }
 
   handleSubmit(e) {
@@ -38,13 +45,13 @@ class BankAccountForm extends React.Component {
           type: state.bankAccount.account_holder_type,
           bank_account: response.id,
           email: state.email,
-          githubId: 1 //TODO: pass down from app state as props
+          githubId: state.githubId
         },
         success: function(data) {
           console.log(data);
         },
         error: function(xhr, status, err) {
-          console.error('/stripe', status, err.toString());
+          console.error('/stripeB', status, err.toString());
         }
       });
 

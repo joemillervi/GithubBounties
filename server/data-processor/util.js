@@ -15,13 +15,13 @@ var dateFormat = require('dateformat');
 
 var QueueManager = require('./queueManager');
 
-//The issue API is throttled by 30 req/min
-var issueQueue = new QueueManager(30);
+//The issue API is throttled by 15 req/min
+var issueQueue = new QueueManager(15);
 
 //The repo API is throttled by 5000/hour but QueueManager is in minutes
 var repoQueue = new QueueManager(60, 304);
 
-//The issue API is throttled by 30 req/min
+//The bountyIssue API is throttled by 30 req/min
 var bountyIssueQueue = new QueueManager(30);
 
 /**Basic gitHub request information that we want to use in almost all API interactions */

@@ -95,8 +95,6 @@ passport.use(new GitHubStrategy({
 },
   function(accessToken, refreshToken, profile, done) {
     process.nextTick(function () {
-      // save to db if user exists
-      console.log('profile: ', profile);
       Users.doesUserExist(profile.id).then(function(data) {
         if (data.length === 0) {
           var userData = {
@@ -183,7 +181,7 @@ app.route('/stripeCC')
     var org_name = req.body.org_name;
     var repo_name = req.body.repo_name;
     var issueNumber = req.body.number;
-    var bountyPrice = req.body.bountyPrice;
+    var bountyPrice = Math.round(req.body.bountyPrice);
     stripe.customers.create({
       source: stripeToken,
     }).then((customer) => {
@@ -201,49 +199,69 @@ app.route('/stripeCC')
           });
         })
         .catch((err) => {
-          console.log('Error adding bounty: ', err);
-          res.statusCode = 501;
-          res.send('Error adding bounty');
-        });
+          console.log('Error adding bounty: ',err);
+          res.status(501).send('Error adding bounty');
+        })
       }) // should update this record immediately
       .catch(() => {
-        res.statusCode = 501;
-        res.send('Error adding payment data');
-      });
+        res.status(501).send('Error adding payment data');
+      })
     })
     .catch(() => {
-      res.statusCode = 501;
-      res.send('Unknown Server Error');
+      res.status(501).send('Unknown Server Error');
     });
   });
 
 app.route('/stripeB')
   .post(function(req, res) {
     var githubId = req.body.githubId;
+    console.log('req.body: ', req.body);
     stripe.recipients.create({
       name: req.body.name,
       type: req.body.type,
-      bank_account: req.body.stripeToken,
+      bank_account: req.body.bank_account,
       email: req.body.email
-    }).then((recipient) => {
+    })
+    .then((recipient) => {
       console.log('recipient', recipient);
-      Users.saveBankRecipientId(recipient.name, recipient.type, recipient.id, recipient.email, githubId);
+      Users.saveBankRecipientId(recipient.name, recipient.type, recipient.id, recipient.email, githubId)
+      .then(() => {
+        console.log('saved bank account recipient ID to DB');
+      })
+      .catch(() => {
+        res.status(501).send('Unknown Server Error');
+      });
     })
-    .then(() => {
-      console.log('saved bank account recipient ID to DB');
+    .catch((err) => {
+      console.log('error');
+      res.status(501).send('Unknown Server Error');
     })
-    .catch(() => {
-      res.statusCode = 501;
-      res.send('Unknown Server Error');
-    });
   });
 
-app.route('/bitcoin')
-.post(function(req, res) {
-  console.log('GOT a match', req.body);
-  // Adds a bitcoin bounty
-  Bounties.saveBitcoin(req.body.bitCoinAmount, req.body.org_name, req.body.repo_name, req.body.number, req.body.githubId);
-});
+  app.route('/bitcoin')
+    .post(function(req, res) {
+      var githubId = req.body.githubId;
+      var org_name = req.body.org_name;
+      var repo_name = req.body.repo_name;
+      var issueNumber = req.body.number;
+      var bitcoin_amount = req.body.bitcoin_amount;
+      // Bounties.saveBitcoin(req.body.bitCoinAmount, req.body.org_name, req.body.repo_name, req.body.number, req.body.githubId)
+      Bounties.saveIssue(githubId, org_name, repo_name, issueNumber, null, bitcoin_amount)
+      .then((bounty) => {
+        console.log('succesfully added bounty: ', bounty);
+        Bounties.updateIssue(bounty[0])
+        .then(() => {
+          console.log('succesfully updated bounty');
+        })
+        .catch((err) => {
+          console.log('Error updating bounty: ', err);
+        })
+      })
+      .catch((err) => {
+        console.log('Error adding bounty: ',err);
+        res.status(501).send('Error adding bounty');
+      })
+    })
 
   // coinbase authenticate our wallet
 var client = new Client({
