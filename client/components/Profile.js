@@ -10,7 +10,7 @@ class Profile extends React.Component {
     this.state = {
       currentUser: null,
       prUrl: '',
-      claimedIssues: [
+      acceptedIssues: [
         {title: 'Some Mapped Dang',
         url: 'https://github.com/ProfoundMongoose/GithubBounties/pulls'
         },
@@ -20,6 +20,16 @@ class Profile extends React.Component {
       ],
       issueState: undefined
     };
+  }
+
+  fetchAcceptedIssues() {
+    $.get('fetchUserIssues', (data) => {
+      if (data) {
+        this.setState({
+          acceptedIssues: data
+        });
+      }
+    })
   }
 
   fetchUserInfo() {
@@ -63,8 +73,9 @@ class Profile extends React.Component {
 
   componentDidMount() {
     this.fetchUserInfo();
+    this.fetchAcceptedIssues();
     var obj = {};
-    this.state.claimedIssues.forEach(function(issue, index){
+    this.state.acceptedIssues.forEach(function(issue, index){
       obj[index] = {state: false, text: ''};
     })
     this.setState({issueState: obj}) 
@@ -99,7 +110,7 @@ class Profile extends React.Component {
               </div>
               <h3> Open Bounties: </h3>
               {
-                this.state.claimedIssues.map(function(issue, i){
+                this.state.acceptedIssues.map(function(issue, i){
 
                   return (
                     <div>

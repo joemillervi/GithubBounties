@@ -1,16 +1,15 @@
 const React = require('react');
 const NavBar = require('./NavBar');
 
-const linksRight = [
-  {name: 'Login', url: '/login'},
-  {name: 'Profile', url: '/profile'},
-  {name: 'Bounties', url: '/bounties'}
-];
 
 const linksLeft = [
   {name: 'Getting Started', url: '/resources'},
   {name: 'Beginner\'s Section', url: '/beginner'},
   {name: 'Repositories', url: '/repos'}
+];
+const linksRight = [
+  {name: 'Profile', url: '/profile'},
+  {name: 'Bounties', url: '/bounties'}
 ];
 
 
@@ -47,7 +46,7 @@ const App = class App extends React.Component {
       <NavBar
       fetchUserInfo={this.fetchUserInfo.bind(this)}
       loggedIn={this.state.currentUser.loggedIn}
-      login={this.state.currentUser.login}
+      username={this.state.currentUser.username} 
       linksRight={linksRight}
       linksLeft={linksLeft}
       username={this.state.currentUser.username}

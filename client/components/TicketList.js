@@ -40,7 +40,6 @@ class TicketList extends React.Component {
         ticketsToRender: data
       });
     }, console.log, searchTerm, language);
-    console.log(this.state);
   }
 
   componentDidMount () {
