@@ -50,7 +50,7 @@ class BountyForm extends React.Component {
 
     setInterval(()=> {
       if (this.state.bitCoinAddress && this.state.bitCoinAmount > 0 && this.state.paymentMethod === 'BitCoin') {
-        this.serverRequest = $.get('https://api.blockcypher.com/v1/btc/test3/addrs/' + this.state.bitCoinAddress + '/balance', function (data) {
+        this.serverRequest = $.get('https://api.blockcypher.com/v1/btc/main/addrs/' + this.state.bitCoinAddress + '/balance', function (data) {
           console.log('address checkup...................', data);
           console.log('bitCount Amount they said they would pay', this.state.bitCoinAmount);
           console.log('bitCount Amount set to address (unconfirmed)', data['unconfirmed_balance']);
