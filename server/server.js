@@ -222,10 +222,10 @@ app.route('/stripeB')
     'tokenUri': 'https://api.coinbase.com/oauth/token'
   });
 
-  Create a wallet (only happens once)
-  client.createAccount({'name': 'mongooseWallet'}, function(err, acct) {
-    console.log(acct.name + ': ' + acct.balance.amount + ' ' + acct.balance.currency);
-  });
+  // Create a wallet (only happens once)
+  // client.createAccount({'name': 'mongooseWallet'}, function(err, acct) {
+  //   console.log(acct.name + ': ' + acct.balance.amount + ' ' + acct.balance.currency);
+  // });
 
   // list the wallets and transactions in our account
   client.getAccounts({}, function(err, accounts) {
@@ -268,8 +268,11 @@ app.post('/payoutBitcoin', function(req, res) {
     'currency': 'BTC'}, function(err, tx) {
       if (err) console.log(err);
       else {
-        // remove bounty from DB
-        console.log(tx);
+        Bounties.removeBounty(req.body.url).then(function(data) { // from bounty url
+          console.log('bounty removed', data)
+        }).catch(function(err) {
+          console.log(err)
+        })
       }
     });
   });

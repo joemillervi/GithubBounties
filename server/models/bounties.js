@@ -16,4 +16,12 @@ Bounties.prototype.saveBitcoin = function (bitCoinAmount, org_name, repo_name, n
     })
 };
 
+Bounties.prototype.removeBounty = function (url) {
+  return db('bountyIssues')
+    .where({html_url: url})
+    .update({
+      state: 'done'
+    })
+};
+
 module.exports = Bounties;
