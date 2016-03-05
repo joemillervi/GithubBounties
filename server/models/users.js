@@ -5,8 +5,6 @@ var Users = function() {
 };
 
 Users.prototype.saveCCPaymentId = function (custId, githubId) {
-  // githubId = Number(githubId);
-
   return db('users')
   .where({github_id: githubId})
   .update({stripe_cust_id: custId})
@@ -19,8 +17,6 @@ Users.prototype.doesUserExist = function (githubId) {
 };
 
 Users.prototype.saveBankRecipientId = function (recipientName, recipientType, recipientId, recipientEmail, githubId) {
-  githubId = Number(githubId);
-
   return db('users')
   .where({github_id: githubId})
   .update({
@@ -37,6 +33,14 @@ Users.prototype.createUser = function (customer) {
     github_username: customer.username,
     github_name: customer.name,
     github_email: customer.email
+  })
+};
+
+Users.prototype.addToQueue = function (issue_id, user_id) {
+  return db('issuesUsers').insert({
+    issue_id: issue_id, /* github_id */
+    user_id: user_id, /* github user id */
+    bounty_paid: false
   })
 };
 
