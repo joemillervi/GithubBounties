@@ -57,4 +57,17 @@ Issues.prototype.getBounties = function () {
   // }
 };
 
+Issues.prototype.getUserIssues = function (username) {
+
+  // Needs different query
+  return db.raw(`select i.*, r.language, r.id as repo_id 
+          from bountyissues i 
+          left join repos r on i.org_name=r.org_name and i.repo_name=r.name 
+          order by created_at desc;`)
+          .then((results) => {
+            return results[0];
+          })
+          .catch(console.log);
+};
+
 module.exports = Issues;
