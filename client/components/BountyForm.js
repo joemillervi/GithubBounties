@@ -21,6 +21,7 @@ class BountyForm extends React.Component {
       exchangeRateBTCUSD: '', //fetched below
       bitCoinReceived: false, //when true, form is submitted
       githubId: '', //fetched below
+      receivedPayment: false // bitcoin has been submitted
     };
   }
 
@@ -28,7 +29,6 @@ class BountyForm extends React.Component {
     Stripe.setPublishableKey('pk_test_4SrTTNmWSmtYCG2BxAYseTE9'); // set your test public key
 
     this.serverRequest = $.get('fetchUserInfo', function (data) {
-      // console.log('user data...................', data);
       this.setState({
         githubId: data.id
       });
@@ -91,7 +91,7 @@ class BountyForm extends React.Component {
           bountyPrice: bountyPrice
         },
         success: function(data) {
-          console.log('data..............', data);
+          console.log('data:', data);
         },
         error: function(xhr, status, err) {
           console.error('/stripeCC', status, err.toString());
@@ -131,30 +131,29 @@ class BountyForm extends React.Component {
     console.log(this.state);
 
     if (this.state.issueURL) {
+      var githubId = this.state.githubId;
       var issueURL = this.state.issueURL;
       var parsedURL = issueURL.split('/');
       var bitcoin = this.state.bitCoinAmount * 100000000;
-
-      var githubId = this.state.githubId;
 
       console.log('issueURL', issueURL);
       console.log('parsedURL', parsedURL);
       console.log('bitcoin in satoshis (multipled by a 100 million)', bitcoin);
 
-      if (this.state.bitCoinReceived) {
+      if (this.state.bitCoinReceived && this.state.receivedPayment === false) {
+        this.setState({'receivedPayment': true});
         $.ajax({
           url: 'http://127.0.0.1:3000/bitcoin',
           dataType: 'json',
           type: 'POST',
           data: {
-            bitCoinAmount: bitcoin, //stored in satoshis (multipled by a 100 million)
+            bitcoin_amount: bitcoin, //stored in satoshis (multipled by a 100 million)
             org_name: parsedURL[3],
             repo_name: parsedURL[4],
             number: parsedURL[6], 
             githubId: githubId 
           },
           success: function(data) {
-            console.log('data..............', data);
             alert('Your bounty has been submitted!');
           },
           error: function(xhr, status, err) {
