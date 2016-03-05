@@ -9,10 +9,9 @@ const linksRight = [
 
 const linksLeft = [
   {name: 'Getting Started', url: '/resources'},
-  {name: 'Beginner\'s Section', url: '/'},
+  {name: 'Beginner\'s Section', url: '/beginner'},
   {name: 'Repositories', url: '/repos'}
 ];
-
 
 const App = class App extends React.Component {
 
@@ -27,6 +26,7 @@ const App = class App extends React.Component {
       }
     };
   }
+
   fetchUserInfo() {
     $.get( 'fetchUserInfo', ( data ) => {
       console.log(data);
@@ -41,13 +41,14 @@ const App = class App extends React.Component {
       }
     });
   }
+
   render () {
     return (
     <div className='app-shell grey lighten-2'>
       <NavBar
       fetchUserInfo={this.fetchUserInfo.bind(this)}
       loggedIn={this.state.currentUser.loggedIn}
-      login={this.state.currentUser.login} 
+      login={this.state.currentUser.login}
       linksRight={linksRight}
       linksLeft={linksLeft}/>
       <div className="row">
@@ -58,6 +59,5 @@ const App = class App extends React.Component {
     </div>
     );
   }
-
 };
 module.exports = App;

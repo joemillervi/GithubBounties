@@ -14,6 +14,8 @@ const Signup = require('./components/Signup');
 const Profile = require('./components/Profile');
 const BountyForm = require('./components/BountyForm');
 const BankAccountForm = require('./components/BankAccountForm');
+const BitCoinPaymentForm = require('./components/BitCoinPaymentForm');
+
 class Bounties extends React.Component {
   render() {
     return (
@@ -25,16 +27,18 @@ class Bounties extends React.Component {
 ReactDOM.render((
   <Router history={hashHistory}>
     <Route path='/' component={App}>
-      <IndexRoute component={TicketList} />
+      <IndexRoute component={Bounties} />
       <Route path='repos' component={RepoList} />
       <Route path='repoProfile/:repoId' component={RepoProfile} />
       <Route path='resources' component={ResourceList} />
+      <Route path='beginner' component={TicketList} />
       <Route path='bounties' component={Bounties} />
       <Route path='login' component={Login} />
       <Route path='signup' component={Signup} />
       <Route path='profile' component={Profile} />
       <Route path='bountyForm' component={BountyForm} />
       <Route path='bankAccountForm' component={BankAccountForm} />
+      <Route path='bitcoinpaymentform' component={BitCoinPaymentForm} />
     </Route>
   </Router>
 ), document.getElementById('app'));

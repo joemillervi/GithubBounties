@@ -54,7 +54,7 @@ CREATE TABLE repos ( /* beginner repos */
 CREATE table users (
   internal_id int AUTO_INCREMENT PRIMARY KEY,
   github_id int NOT NULL,
-  github_login varchar(50),
+  github_username varchar(50),
   github_name varchar(50),
   github_email varchar(50),
   stripe_cust_id varchar(40),
@@ -66,11 +66,11 @@ CREATE table users (
 
 CREATE table bountyIssues (
   internal_id int AUTO_INCREMENT PRIMARY KEY,
-  id int NOT NULL,
+  id int,
   number int NOT NULL,
   repo_name varchar(50) NOT NULL,
   org_name varchar(50) NOT NULL, 
-  title varchar(2000) NOT NULL,
+  title varchar(2000),
   comments int,
   created_at datetime,
   updated_at datetime, 
@@ -80,10 +80,10 @@ CREATE table bountyIssues (
   labels varchar(1000),
   state varchar(20), /* ticket is open? */
   etag varchar(50),
-  bountyAmount int,
-  bitCoinAmount int, /* stored in satoshis */
+  bounty_price int,
+  bitcoin_amount int, /* stored in satoshis */
   bounty_user_id int, /* github user ID */
-  data_refreshed_at datetime,
+  data_refreshed_at datetime
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE table pullRequests (
@@ -108,12 +108,9 @@ CREATE table pullRequests (
 
 CREATE table issuesUsers (
   internal_id int AUTO_INCREMENT PRIMARY KEY,
-  issue_id int NOT NULL,
-  user_id int NOT NULL,
-  pr_id int,
-  FOREIGN KEY (user_id) REFERENCES users(internal_id),
-  FOREIGN KEY (issue_id) REFERENCES bountyIssues(internal_id),
-  FOREIGN KEY (pr_id) REFERENCES pullRequests(internal_id)
+  issue_id int NOT NULL, /* github_id */
+  user_id int NOT NULL, /* github user id */
+  pr_id int
 );
 
 CREATE INDEX OrgRepo ON repos (name,org_name);
