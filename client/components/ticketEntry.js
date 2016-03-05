@@ -11,15 +11,15 @@ class TicketEntry extends React.Component {
     };
   }
 
-  claimBounty() { 
-    $.post('claimBounty', {url: this.props.data.html_url}, ( data ) => {
-      console.log('accepted bounty', data);
+  addToQueue() { 
+    $.post('addToQueue', {issue_id: this.props.data.id}, ( data ) => {
+      console.log(data);
     });
   }
 
   render() {
     var bounty = this.state.bounty ? <h4> $ {this.props.data.bounty_price} </h4> : null;
-    var button = this.state.bounty ? <a href='#' onClick={this.claimBounty.bind(this)} className='btn indigo accent-2'> Accept </a> : null;
+    var button = this.state.bounty ? <a href='#' onClick={this.addToQueue.bind(this)} className='btn indigo accent-2'> Accept </a> : null;
     return (
       <div className="row">
         <div className="col s12 m10">

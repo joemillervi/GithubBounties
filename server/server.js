@@ -199,13 +199,13 @@ app.route('/stripeCC')
           });
         })
         .catch((err) => {
-          console.log('Error adding bounty: ',err);
+          console.log('Error adding bounty: ', err);
           res.status(501).send('Error adding bounty');
-        })
+        });
       }) // should update this record immediately
       .catch(() => {
         res.status(501).send('Error adding payment data');
-      })
+      });
     })
     .catch(() => {
       res.status(501).send('Unknown Server Error');
@@ -235,33 +235,33 @@ app.route('/stripeB')
     .catch((err) => {
       console.log('error');
       res.status(501).send('Unknown Server Error');
-    })
+    });
   });
 
-  app.route('/bitcoin')
-    .post(function(req, res) {
-      var githubId = req.body.githubId;
-      var org_name = req.body.org_name;
-      var repo_name = req.body.repo_name;
-      var issueNumber = req.body.number;
-      var bitcoin_amount = req.body.bitcoin_amount;
-      // Bounties.saveBitcoin(req.body.bitCoinAmount, req.body.org_name, req.body.repo_name, req.body.number, req.body.githubId)
-      Bounties.saveIssue(githubId, org_name, repo_name, issueNumber, null, bitcoin_amount)
-      .then((bounty) => {
-        console.log('succesfully added bounty: ', bounty);
-        Bounties.updateIssue(bounty[0])
-        .then(() => {
-          console.log('succesfully updated bounty');
-        })
-        .catch((err) => {
-          console.log('Error updating bounty: ', err);
-        })
+app.route('/bitcoin')
+  .post(function(req, res) {
+    var githubId = req.body.githubId;
+    var org_name = req.body.org_name;
+    var repo_name = req.body.repo_name;
+    var issueNumber = req.body.number;
+    var bitcoin_amount = req.body.bitcoin_amount;
+    // Bounties.saveBitcoin(req.body.bitCoinAmount, req.body.org_name, req.body.repo_name, req.body.number, req.body.githubId)
+    Bounties.saveIssue(githubId, org_name, repo_name, issueNumber, null, bitcoin_amount)
+    .then((bounty) => {
+      console.log('succesfully added bounty: ', bounty);
+      Bounties.updateIssue(bounty[0])
+      .then(() => {
+        console.log('succesfully updated bounty');
       })
       .catch((err) => {
-        console.log('Error adding bounty: ',err);
-        res.status(501).send('Error adding bounty');
-      })
+        console.log('Error updating bounty: ', err);
+      });
     })
+    .catch((err) => {
+      console.log('Error adding bounty: ', err);
+      res.status(501).send('Error adding bounty');
+    });
+  });
 
   // coinbase authenticate our wallet
 var client = new Client({
@@ -313,12 +313,19 @@ app.get('/reqNewAddress', function(req, res) {
   });
 });
 
-
-app.post('/claimBounty', function(req, res) {
+app.post('/addToQueue', function(req, res) {
   console.log('bounty', req.body);
-  var user = req.session.passport.user;
-    // Create handler to save it to db
-  res.json();
+  var issue_id = req.body.data.id;
+  var user_id = req.session.passport.user.id;
+  Users.addToQueue(issue_id, user_id)
+  .then(() => {
+    console.log('Successfully added bounty to queue');
+    res.status(200).send('Success');
+  })
+  .catch((err) => {
+    console.log('Error adding bounty to queue: ', err);
+    res.status(501).send('Error adding bounty');
+  });
 });
 
 app.get('/fetchUserIssues', function(req, res) {
