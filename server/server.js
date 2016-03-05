@@ -121,7 +121,7 @@ passport.use(new GitHubStrategy({
       // represent the logged-in user.  In a typical application, you would want
       // to associate the GitHub account with a user record in your database,
       // and return that user instead.
-      console.log(profile);
+      // console.log(profile);
       return done(null, profile);
     });
   }
@@ -246,8 +246,8 @@ app.route('/stripeB')
   var client = new Client({
     'apiKey': config.COINBASE_API_KEY,
     'apiSecret': config.COINBASE_API_SECRET,
-    'baseApiUri': 'https://api.sandbox.coinbase.com/v2/',
-    'tokenUri': 'https://api.sandbox.coinbase.com/oauth/token'
+    'baseApiUri': 'https://api.coinbase.com/v2/',
+    'tokenUri': 'https://api.coinbase.com/oauth/token'
   });
 
   // Create a wallet (only happens once)
@@ -274,7 +274,7 @@ app.route('/stripeB')
 
 // 53f4b4cd-8a6d-58a1-8b94-d318a216d209
 app.get('/reqNewAddress', function(req, res) {
-  client.getAccount('53f4b4cd-8a6d-58a1-8b94-d318a216d209', function(err, account) {
+  client.getAccount('80113505-bb59-5d0d-88b0-c6bd2c6d4a1a', function(err, account) {
     if (err) console.log('get acct err', err)
     else {
       account.createAddress(null, function(err, addr) {
@@ -288,7 +288,20 @@ app.get('/reqNewAddress', function(req, res) {
   });
 })
 
-
+// Payout to a bitcoin bountyhunter
+app.post('/payoutBitcoin', function(req, res) {
+  client.getAccount('80113505-bb59-5d0d-88b0-c6bd2c6d4a1a', function(err, account) {
+    account.sendMoney({'to': req.body.address,
+    'amount': '0.001',
+    'currency': 'BTC'}, function(err, tx) {
+      if (err) console.log(err);
+      else {
+        // remove bounty from DB
+        console.log(tx);
+      }
+    });
+  });
+})
 
 console.log(`server running on port ${port} in ${process.env.NODE_ENV} mode`);
 // start listening to requests on port 3000
